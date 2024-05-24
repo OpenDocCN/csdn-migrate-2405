@@ -1,0 +1,2691 @@
+# ReasonML 快速启动指南（一）
+
+> 原文：[`zh.annas-archive.org/md5/EBC7126C5733D51726286A656704EE51`](https://zh.annas-archive.org/md5/EBC7126C5733D51726286A656704EE51)
+> 
+> 译者：[飞龙](https://github.com/wizardforcel)
+> 
+> 协议：[CC BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+# 前言
+
+ReactJS 已经改变了我们所知的前端开发世界。它的创造者 Jordan Walke 也创建了 ReasonML 和 ReasonReact 作为 React 的未来。React 对 DOM 的抽象允许强大的编程范式，有助于解决 JavaScript 的可维护性问题，在本书中，我们将深入探讨 Reason 如何帮助您构建更简单，更易维护的 React 应用程序。本书是使用 ReasonML 构建 React 应用程序的实用指南。
+
+# 本书的受众
+
+本书的目标读者是熟悉 ReactJS 的 JavaScript 开发人员。不需要具有静态类型语言的先前经验。
+
+# 本书涵盖的内容
+
+第一章，ReasonML 简介，讨论了当前的 Web 开发状态以及为什么我们会考虑 ReasonML 用于前端开发（以及更多）。
+
+第二章，设置开发环境，让我们开始运行。
+
+第三章，创建 ReasonReact 组件，演示了如何使用 ReasonML 和 ReasonReact 创建 React 组件。在这里，我们开始构建一个应用程序外壳，然后在本书的其余部分进行添加。
+
+第四章，BuckleScript，Belt 和互操作性，让我们全面了解 Reason 的生态系统和标准库。
+
+第五章，有效的 ML，深入探讨了 Reason 类型系统的一些更高级特性，使用了商业示例。
+
+第六章，CSS-in-JS（在 Reason 中），展示了 CSS-in-JS 在 Reason 中的工作原理以及类型系统如何帮助。
+
+第七章，Reason 中的 JSON，演示了如何将 JSON 转换为 Reason 中的数据结构，并说明了 GraphQL 如何帮助。
+
+第八章，使用 Jest 进行单元测试，介绍了流行的 Jest 测试库的测试。
+
+# 为了充分利用本书
+
+您应该熟悉以下内容：
+
++   命令行界面
+
++   GitHub 和 Git
+
++   诸如 Visual Studio Code 之类的文本编辑器
+
+# 下载示例代码文件
+
+您可以从[www.packt.com](http://www.packt.com)的帐户中下载本书的示例代码文件。如果您在其他地方购买了本书，您可以访问[www.packt.com/support](http://www.packt.com/support)并注册，文件将直接发送到您的邮箱。
+
+您可以按照以下步骤下载代码文件：
+
+1.  在[www.packt.com](http://www.packt.com)上登录或注册。
+
+1.  选择“支持”选项卡。
+
+1.  单击“代码下载和勘误”。
+
+1.  在搜索框中输入书名，然后按照屏幕上的说明进行操作。
+
+文件下载后，请确保使用以下最新版本解压或提取文件夹：
+
++   WinRAR/7-Zip for Windows
+
++   Zipeg/iZip/UnRarX for Mac
+
++   7-Zip/PeaZip for Linux
+
+本书的代码包也托管在 GitHub 上，网址为[`github.com/PacktPublishing/ReasonML-Quick-Start-Guide`](https://github.com/PacktPublishing/ReasonML-Quick-Start-Guide)。如果代码有更新，将在现有的 GitHub 存储库上进行更新。
+
+我们还有其他代码包来自我们丰富的图书和视频目录，可在[`github.com/PacktPublishing/`](https://github.com/PacktPublishing/)上找到。去看看吧！
+
+# 使用的约定
+
+本书中使用了许多文本约定。
+
+`CodeInText`：指示文本中的代码词，文件夹名称，文件名，文件扩展名，路径名和变量名。这是一个例子：“运行`npm run build`来将`Demo.re`编译为 JavaScript。”
+
+代码块设置如下：
+
+```js
+"warnings": {
+  "error": "A"
+},
+```
+
+当我们希望引起您对代码块的特定部分的注意时，相关的行或项目将以粗体显示：
+
+```js
+/* bsconfig.json */
+...
+"sources": {
+  "dir": "src",
+  "subdirs": true
+},
+...
+```
+
+任何命令行输入或输出都将按以下方式编写：
+
+```js
+bsb -init my-reason-react-app -theme react
+cd my-reason-react-app
+```
+
+**粗体**：表示一个新术语，一个重要词，或者你在屏幕上看到的词。例如，菜单或对话框中的单词会以这种方式出现在文本中。这是一个例子：“padLeft 的类型是(string, some_variant) => string，其中 some_variant 使用了一个称为**多态变体**的高级类型系统特性，它使用[@bs.unwrap]来转换为 JavaScript 可以理解的东西。”
+
+警告或重要说明会显示为这样。
+
+提示和技巧会显示为这样。
+
+
+# 第一章：介绍 ReasonML
+
+过去十年，我们构建用户界面的方式发生了许多范式转变。Web 应用程序已经从服务器端框架转移到客户端框架，以提供更好的用户体验。设备和浏览器已经足够强大，可以运行强大的客户端应用程序，而 JavaScript 语言本身多年来也有许多改进。渐进式 Web 应用程序提供了类似本机的用户体验，WebAssembly 允许在 Web 平台上获得类似本机的性能。越来越多的应用程序正在为浏览器构建，导致需要维护更大的客户端代码库。
+
+在这段时间内，几个框架、库、工具和一般最佳实践获得了然后失去了流行，导致许多开发人员出现了**JavaScript 疲劳**。由于对招聘和留住工程人才、生产力和可维护性的影响，公司越来越谨慎地承诺使用新技术。如果您向团队引入错误的技术（或者在错误的时间引入正确的技术），这可能是一个昂贵的错误。
+
+对于许多公司和开发人员来说，React 已被证明是一个可靠的选择。2013 年，Facebook 在 2011 年内部使用了这个库后，将其开源。他们挑战我们重新思考最佳实践（[`www.youtube.com/watch?v=DgVS-zXgMTk&feature=youtu.be`](https://www.youtube.com/watch?v=DgVS-zXgMTk&feature=youtu.be)），自那时起，它已经接管了前端开发（[`medium.freecodecamp.org/yes-react-is-taking-over-front-end-development-the-question-is-why-40837af8ab76`](https://medium.freecodecamp.org/yes-react-is-taking-over-front-end-development-the-question-is-why-40837af8ab76)）。将标记、行为和样式封装到可重用的组件中已成为巨大的生产力和可维护性优势。DOM 的抽象化使得组件变得简单、声明式，易于理解、组合和测试。
+
+通过 React，Facebook 在教育前端开发人员社区方面做得非常出色，传统的函数式编程范式使得更容易理解和维护代码。现在，Facebook 认为是使用 ReasonML 的时机。
+
+这是来自[npmtrends.com](https://www.npmtrends.com/)的两年图表，显示了一些顶级 JavaScript 库和框架的每周 npm 下载次数。ReactJS 似乎是一个明显的赢家，每周下载量已经超过 250 万次：
+
+![](https://github.com/OpenDocCN/freelearn-js-zh/raw/master/docs/rsnml-qk-st-gd/img/b5957f88-9ae0-4aaa-ba2a-f1ec78579b88.png)
+
+npmtrends.com
+
+在本章中，我们将做以下事情：
+
++   讨论 ReasonML 是什么，以及它试图解决什么问题
+
++   了解 Facebook 选择 ReasonML 作为 ReactJS 未来的一些原因
+
++   在在线游乐场中尝试 ReasonML，并检查其编译（JavaScript）输出
+
+# 什么是 ReasonML？
+
+Reason 是 OCaml 语言的一层语法和工具，Facebook 积极使用这种语言。实际上，乔丹[沃尔克]在 React 之前就开始了 Reason 的概念。我们正在将其用作实际的前端语言（以及其他用途），因为我们认为在三年半之后，React 实验已经成功，人们现在已经准备好使用 Reason...
+
+- 郑楼，2017 年 1 月
+
+([`www.reactiflux.com/transcripts/cheng-lou/`](https://www.reactiflux.com/transcripts/cheng-lou/))
+
+让我们扩展一下这个引用。ReasonML 不是一种新语言；它是 OCaml 语言的一种新语法，旨在让 JavaScript 开发人员感到熟悉。从现在开始，我们将称之为 Reason，它与 OCaml 具有完全相同的 AST，因此 Reason 和 OCaml 只在语法上有所不同。语义是相同的。通过学习 Reason，您也在学习 OCaml。事实上，有一个命令行工具可以在 OCaml 和 Reason 语法之间转换，称为`refmt`，它格式化 Reason/OCaml 代码类似于 JavaScript 的 prettier——事实上，prettier 受`refmt`启发。
+
+OCaml 是一种以表现力和安全性为重点的通用编程语言。它最初发布于 1996 年，具有先进的类型系统，可以帮助捕捉错误而不妨碍编程。与 JavaScript 一样，OCaml 具有垃圾回收功能，用于自动内存管理，并且具有一流函数，可以作为参数传递给其他函数。
+
+Reason 也是一个工具链，使得那些来自 JavaScript 背景的人更容易入门。这个工具链允许我们充分利用 JavaScript 和 OCaml 生态系统。我们将在第二章中深入探讨这一点，*设置开发环境*。现在，我们将直接在在线游乐场进行实验，访问 Reason 的在线游乐场[`reasonml.github.io/try`](https://reasonml.github.io/try)。
+
+尝试在在线游乐场中输入这个 Hello World 的例子：
+
+```js
+let message = "World";
+Js.log("Hello " ++ message);
+```
+
+有两件事你会注意到：
+
++   OCaml 语法会自动生成在编辑器的左下角（未显示）
+
++   Reason/OCaml 代码直接在浏览器中编译为 JavaScript：
+
+```js
+// Generated by BUCKLESCRIPT VERSION 3.2.0, PLEASE EDIT WITH CARE
+'use strict';
+
+var message = "World";
+
+console.log("Hello World");
+
+exports.message = message;
+/* Not a pure module */
+```
+
+也许你会想知道 Reason/OCaml 代码是如何在浏览器中编译的。BuckleScript 是 Reason 的合作项目，它将 OCaml AST 编译为 JavaScript。由于 Reason 和 OCaml 都转换为相同的 OCaml AST，BuckleScript 同时支持 Reason 和 OCaml。此外，由于 BuckleScript 本身是用 OCaml 编写的，它可以被编译为 JavaScript 并直接在浏览器中运行。
+
+检查编译后的 JavaScript 代码，你会发现它是多么易读。更仔细地观察，你会注意到编译后的输出也经过了优化：在`console.log`语句中，`"Hello World"`字符串直接内联，而不是使用`message`变量。
+
+BuckleScript 利用 OCaml 类型系统和编译器实现的特性，在离线编译期间能够提供许多优化，使得运行时代码非常快速。
+
+- BuckleScript 文档
+
+([`bucklescript.github.io/bucklescript/Manual.html#_why_bucklescript`](https://bucklescript.github.io/bucklescript/Manual.html#_why_bucklescript)[)](https://bucklescript.github.io/bucklescript/Manual.html#_why_bucklescript)
+
+值得注意的是，BuckleScript 还支持字符串插值([`bucklescript.github.io/docs/en/common-data-types.html#interpolation`](https://bucklescript.github.io/docs/en/common-data-types.html#interpolation))：
+
+```js
+/* The message variable is interpolated */
+{j|Hello $message|j}
+```
+
+# 为什么选择 Reason？
+
+Reason 有什么让人着迷的？Reason 能做到 TypeScript 或 Flow 做不到的吗？它只是拥有静态类型检查器吗？这些是我刚开始接触 Reason 时的一些问题。
+
+# 对不可变性和纯度的支持
+
+理由不仅仅是拥有静态类型系统。同样重要的是 Reason 默认是不可变的。不可变性是函数式编程中的重要概念。在实践中，使用不可变数据结构（无法更改的数据结构）比可变数据结构产生更安全、更易于推理和更易于维护的代码。这将是本书中的一个重要主题。
+
+纯度是函数式编程中的另一个重要概念。如果一个函数的输出仅由其输入决定，没有可观察的副作用，那么这个函数就是纯的。换句话说，纯函数除了返回一个值之外不做任何事情。以下是一个纯函数的例子：
+
+```js
+let add = (a, b) => a + b;
+```
+
+这是一个不纯的函数的例子：
+
+```js
+let add = (a, b) => {
+  Js.log("side-effect");
+  a + b;
+};
+```
+
+在这种情况下的副作用是写入浏览器的控制台。这就是为什么在我们之前的 Hello World 例子中，BuckleScript 在编译输出的末尾包含了`/* Not a pure module */`注释。
+
+改变全局变量也是一种副作用。考虑以下 JavaScript：
+
+```js
+var globalObject = {total: 0};
+const addAndMutate = (a, b) => globalObject.total = a + b;
+addAndMutate(40, 2);
+/* globalObject now is mutated */
+```
+
+全局对象被改变了，现在它的`total`属性是`42`。现在我们必须意识到在使用它时，所有可以改变`globalObject`的区域。忘记这个对象既是全局的又是可变的，可能会导致难以调试的问题。解决这个问题的一种成语解决方案是将`globalObject`移到一个不再是全局的模块中。这样，只有该模块才能访问它。然而，我们仍然需要意识到这个模块内所有可以更新对象的区域。
+
+如果`globalObject`是不可变的，就不会有改变它的方法。因此，我们不需要意识到所有可以改变`globalObject`的区域，因为不会有这些区域。我们将看到，使用 Reason，通过创建原始数据的更新副本来构建真实应用程序是相当简单和自然的。考虑以下内容：
+
+```js
+let foo = 42;
+let foo = foo + 1;
+Js.log(foo);
+/* 43 */
+```
+
+语法感觉非常自然。正如我们将在本书的后面看到的，不可变性——通过返回更新的副本而不是在原地应用破坏性的更改——非常适合 React/Redux 的做事情方式。
+
+原始的`foo`没有被改变；它被遮蔽了。一旦被遮蔽，旧的`foo`绑定就不可用了。绑定可以在局部作用域和全局作用域中被遮蔽：
+
+```js
+let foo = 42;
+
+{
+  let foo = 43;
+  Js.log(foo); /* 43 */
+};
+
+Js.log(foo); /* 42 */
+
+let foo = 43;
+Js.log(foo); /* 43 */
+```
+
+尝试改变`foo`会导致编译错误：
+
+```js
+let foo = 42;
+foo = 43;
+/* compilation error */
+```
+
+我们可以看到，不可变性和纯度是相关的主题。拥有支持不可变性的语言可以让你以无副作用的方式编程。然而，如果纯度会导致代码变得比使用副作用更复杂和难以理解，怎么办？你可能会松一口气地得知，Reason（在本书的其余部分可以与 OCaml 互换使用）是一种实用的语言，让我们在需要时引起副作用。
+
+使用像[Reason]这样的语言时，关键是不要避免副作用，因为避免副作用等同于避免做任何有用的事情。事实证明，在现实中，程序不仅仅是*计算*事情，它们*做*事情。它们发送消息，写文件，做各种各样的事情。做事情自动涉及副作用。支持纯度的语言给你的是，它让你能够在很大程度上将具有副作用的部分分割到代码的清晰和可控的区域，这样更容易推理。
+
+- Yaron Minsky
+
+（[`www.youtube.com/watch?v=-J8YyfrSwTk&feature=youtu.be&t=47m29s`](https://www.youtube.com/watch?v=-J8YyfrSwTk&feature=youtu.be&t=47m29s)）
+
+还要知道的是，不可变性并不会影响性能。在底层，有优化措施可以保持 Reason 的不可变数据结构快速。
+
+# 模块系统
+
+Reason 有一个复杂的模块系统，允许模块化开发和代码组织。在 Reason 中，所有模块都是全局可用的，当需要时，模块接口可以用来隐藏实现细节。我们将在第五章中探讨这个概念，*Effective ML*。
+
+# 类型系统
+
+Reason 的类型系统是可靠的，这意味着一旦编译，就不会有运行时类型错误。语言中没有`null`，也没有与`null`相关的任何错误。在 JavaScript 中，当某个东西是`number`类型时，它也可以是`null`。Reason 使用一个特殊类型来表示那些也可以是`null`的东西，并通过拒绝编译来强制开发人员适当处理这些情况。
+
+到目前为止，我们已经写了一些，尽管基本的 Reason 代码，甚至没有谈论类型。Reason 会自动推断类型。正如我们将在本书中学到的那样，类型系统是一个工具，可以在不妨碍我们的情况下提供保证，并且当正确使用时，可以让我们将一些事情交给编译器，而不是留在我们的脑海中。
+
+Reason 对不可变编程、健全类型系统和复杂的模块系统的支持是 Reason 如此出色的重要原因，而且在一个语言中同时使用所有这些特性，这是有意思的。当 Facebook 最初发布 React 时，他们要求我们给它五分钟（[`signalvnoise.com/posts/3124-give-it-five-minutes`](https://signalvnoise.com/posts/3124-give-it-five-minutes)），希望这种心态在这里也会有所收获。
+
+# 跨平台
+
+使用 Reason 构建 React 应用是一种愉快的体验，而且由于 OCaml 能够编译成本地代码，我们将能够利用这些技能构建编译成汇编、iOS/Android 等更多应用。事实上，Jared Forsyth 已经从一个 Reason 代码库中创建了一个名为 Gravitron 的游戏，可以编译成 iOS、Android、Web 和 macOS（[`github.com/jaredly/gravitron`](https://github.com/jaredly/gravitron)）。话虽如此，就目前而言，前端 JavaScript 的情况要更加完善。
+
+# 可维护性
+
+Reason 可能需要一些时间来适应，但你可以把这段时间看作是对未来产品维护和信心的投资。尽管渐进式类型系统的语言，如 TypeScript，可能更容易入门，但它们无法提供 Reason 这样健全类型系统所能提供的保证。Reason 的真正优势无法完全通过简单的例子来传达，只有在节省你在推理、重构和维护代码方面的时间和精力时才能真正展现出来。换句话说，如果有人告诉我他对我的床上没有蜘蛛有 99%的把握，我仍然会检查整个床，因为我不喜欢虫子！
+
+只要你百分之百使用 Reason 并且你的代码编译通过，类型系统保证不会有运行时类型错误。当你与非 Reason 代码（例如 JavaScript）进行互操作时，会引入运行时类型错误的可能性。Reason 的健全类型系统使你可以相信应用程序的 Reason 部分不会引起运行时类型错误，因此可以专注于确保这些应用程序区域是安全的。根据我的经验，在动态语言中编程可能会感觉明显危险。另一方面，Reason 总是给人一种有保障的感觉。
+
+# 互操作性
+
+话虽如此，有时候，特别是在初学类型系统时，你可能不确定如何使你的代码编译通过。通过 BuckleScript，Reason 允许你在需要时直接使用原始 JavaScript，无论是通过绑定还是直接在你的 Reason（.re）文件中。这使你可以在 JavaScript 中逐步解决问题，然后一旦准备好，将代码部分转换为类型安全的 Reason。
+
+BuckleScript 还让我们以一种非常合理的方式绑定到惯用的 JavaScript。正如你将在第四章《BuckleScript、Belt 和互操作性》中了解到的那样，BuckleScript 是 Reason 的一个非常强大的部分。
+
+# ES2030
+
+使用 Reason 感觉就像在编写 JavaScript 的未来版本。一些 Reason 语言特性，包括管道操作符（[`github.com/tc39/proposal-pipeline-operator`](https://github.com/tc39/proposal-pipeline-operator)）和模式匹配（[`github.com/tc39/proposal-pattern-matching`](https://github.com/tc39/proposal-pattern-matching)），目前正在向 TC39 委员会提议将其添加到 JavaScript 语言中。通过 Reason，我们可以立即利用这些特性以及更多。
+
+# 社区
+
+Reason 社区无疑是我参与过的最乐于助人、支持和包容的社区之一。如果你有问题或遇到困难，Reason Discord 频道是实时支持的好去处。
+
+原因 Discord 频道：
+
+[`discord.gg/reasonml`](https://discord.gg/reasonml)
+
+通常，当开始使用新技术时，与有经验的人交谈五分钟可以节省你几个小时的挫败感。我个人在一天（和夜晚）的所有时间都问问题，并对有多快有人帮助我感到非常感激和惊讶。花点时间加入 Discord 频道，介绍自己，提问，并分享如何使 Reason 变得更好的反馈！
+
+# ReactJS 的未来
+
+实际上，很少有真实世界的应用程序仅使用 ReactJS。通常会引入其他技术，如 Babel、ESLint、Redux、Flow/TypeScript 和 Immutable.js，以帮助增加代码库的可维护性。Reason 通过其核心语言特性取代了对这些额外技术的需求。
+
+ReasonReact 是一个与 ReactJS 绑定并提供了一种更简单、更安全的构建 ReactJS 组件的 Reason 库。就像 ReactJS 只是 JavaScript 一样，ReasonReact 只是 Reason。此外，它很容易逐步采用，因为它是由创建 ReactJS 的同一个人制作的。
+
+ReasonReact 带有内置路由器、类似 Redux 的数据管理和 JSX。如果你来自 ReactJS 背景，你会感到非常亲切。
+
+值得一提的是，Reason/ReasonReact 已经被一些公司在生产中使用，包括世界上最大的代码库之一。Facebook 的 messenger.com 代码库已经超过 50%转换为 ReasonReact。
+
+ReasonReact 的每个功能都在 messenger.com 代码库上进行了广泛测试。
+
+- Cheng Lou
+
+([`reason.town/reason-philosophy`](https://reason.town/reason-philosophy))
+
+因此，Reason 和 ReasonReact 的新版本都配备了代码修改，自动化了大部分甚至全部的代码库升级过程。在发布给公众之前，新功能在 Facebook 内部经过了彻底的测试，这带来了愉快的开发者体验。
+
+# 探索 Reason
+
+请问以下是一个语句还是一个表达式：
+
+```js
+let foo = "bar";
+```
+
+在 JavaScript 中，它是一个语句，但在 Reason 中，它是一个表达式。另一个表达式的例子是`4 + 3`，也可以表示为`4 + (2 + 1)`。
+
+Reason 中的许多东西都是表达式，包括`if-else`、`switch`、`for`和`while`等控制结构：
+
+```js
+let message = if (true) {
+  "Hello"
+} else {
+  "Goodbye"
+};
+```
+
+我们在 Reason 中也有三元运算符。以下是表达前述代码的另一种方式：
+
+```js
+let message = true ? "Hello" : "Goodbye";
+```
+
+即使是匿名块作用域也是表达式，其结果为最后一行的表达式：
+
+```js
+let message = {
+  let part1 = "Hello";
+  let part2 = "World";
+  {j|$part1 $part2|j};
+};
+/* message evaluates to "Hello World" */
+/* part1 and part2 are not accessible here */
+```
+
+`元组`是一个不可变的数据结构，可以容纳不同类型的值，并且可以是任意长度的：
+
+```js
+let tuple = ("one", 2, "three");
+```
+
+让我们利用我们已经知道的知识，从 Reason 的在线游乐场中的`FizzBuzz`示例开始。`FizzBuzz`曾是一个流行的面试问题，用来确定候选人是否能编程。挑战是编写一个问题，打印从`1`到`100`的数字，但对于三的倍数打印`Fizz`，对于五的倍数打印`Buzz`，对于三和五的倍数打印`FizzBuzz`：
+
+```js
+/* Based on https://rosettacode.org/wiki/FizzBuzz#OCaml */
+let fizzbuzz = (i) =>
+  switch (i mod 3, i mod 5) {
+  | (0, 0) => "FizzBuzz"
+  | (0, _) => "Fizz"
+  | (_, 0) => "Buzz"
+  | _ => string_of_int(i)
+  };
+
+for (i in 1 to 100) {
+  Js.log(fizzbuzz(i))
+};
+```
+
+在这里，`fizzbuzz`是一个接受整数并返回字符串的函数。一个命令式的`for`循环将其输出记录到控制台。
+
+在 Reason 中，函数的最后一个表达式成为函数的返回值。`switch`表达式是唯一的`fizzbuzz`表达式，所以无论它评估为什么都成为`fizzbuzz`的输出。与 JavaScript 一样，`switch`评估一个表达式，并执行第一个匹配的分支。在这种情况下，`switch`评估元组表达式：`(i mod 3, i mod 5)`。
+
+给定`i=1`，`(i mod 3, i mod 5)`变为`(1, 1)`。由于`(1, 1)`不匹配`(0, 0)`、`(0, _)`或`(_, 0)`，按顺序，最后一个`_`（也就是*任何东西*）被匹配，返回`"1"`。类似地，当给定`i=2`时，`fizzbuzz`返回`"2"`。当给定`i=3`时，返回`"Fizz"`。
+
+或者，我们可以使用`if-else`来实现`fizzbuzz`：
+
+```js
+let fizzbuzz = (i) =>
+  if (i mod 3 == 0 && i mod 5 == 0) {
+    "FizzBuzz"
+  } else if (i mod 3 == 0) {
+    "Fizz"
+  } else if (i mod 5 == 0) {
+    "Buzz"
+  } else {
+    string_of_int(i)
+  };
+```
+
+然而，switch 版本更易读。正如我们将在本章后面看到的那样，switch 表达式，也称为**模式匹配**，比我们迄今为止看到的更强大。
+
+# 数据结构和类型
+
+类型是一组值。更具体地说，`42`具有`int`类型，因为它是包含在整数集合中的值。浮点数是包含小数点的数字，即`42.`和`42.0`。在 Reason 中，整数和浮点数有不同的运算符：
+
+```js
+/* + for ints */
+40 + 2;
+
+/* +. for floats */
+40\. +. 2.;
+```
+
+对于`-.`, `-`, `*.`，`*`，`/.`和`/`也是如此。
+
+Reason 使用双引号表示`string`类型，单引号表示`char`类型。
+
+# 创建我们自己的类型
+
+我们也可以创建我们自己的类型：
+
+```js
+type person = (string, int);
+
+/* or */
+
+type name = string;
+type age = int;
+type person = (name, age);
+```
+
+这是我们如何创建`person`类型的人：
+
+```js
+let person = ("Zoe", 3);
+```
+
+我们还可以用它的类型注释任何表达式：
+
+```js
+let name = ("Zoe" : string);
+let person = ((name, 3) : person);
+```
+
+# 模式匹配
+
+我们可以在我们的人身上进行模式匹配：
+
+```js
+switch (person) {
+| ("Zoe", age) => {j|Zoe, $age years old|j}
+| _ => "another person"
+};
+```
+
+让我们使用记录而不是元组来表示我们的人。记录类似于 JavaScript 对象，只是它们更轻量，并且默认情况下是不可变的：
+
+```js
+type person = {
+  age: int,
+  name: string
+};
+
+let person = {
+  name: "Zoe",
+  age: 3
+};
+```
+
+我们也可以在记录上进行模式匹配：
+
+```js
+switch (person) {
+| {name: "Zoe", age} => {j|Zoe, $age years old|j}
+| _ => "another person"
+};
+```
+
+与 JavaScript 一样，`{name: "Zoe", age: age}`可以表示为`{name: "Zoe", age}`。
+
+我们可以使用扩展（`...`）运算符从现有记录创建新记录：
+
+```js
+let person = {...person, age: person.age + 1};
+```
+
+记录在使用之前需要类型定义。否则，编译器将出现以下类似的错误：
+
+```js
+The record field name can't be found.
+
+```
+
+记录必须与其类型具有相同的形状。因此，我们不能向我们的`person`记录添加任意字段：
+
+```js
+let person = {...person, favoriteFood: "broccoli"};
+
+/*
+  We've found a bug for you!
+
+  This record expression is expected to have type person
+  The field favoriteFood does not belong to type person
+*/
+```
+
+元组和记录是产品类型的例子。在我们最近的例子中，我们的`person`类型需要一个`int`和一个`age`。几乎所有 JavaScript 的数据结构都是产品类型；唯一的例外是`boolean`类型，它要么是`true`，要么是`false`。
+
+Reason 的变体类型是求和类型的一个例子，它允许我们表达这个或那个。我们可以将`boolean`类型定义为一个变体：
+
+```js
+type bool =
+  | True
+  | False;
+```
+
+我们可以有尽可能多的构造函数：
+
+```js
+type decision =
+  | Yes
+  | No
+  | Maybe;
+```
+
+`Yes`，`No`和`Maybe`被称为构造函数，因为我们可以使用它们来构造值。它们也通常被称为**标签**。因为这些标签可以构造值，变体既是一种类型，也是一种数据结构：
+
+```js
+let decision = Yes;
+```
+
+当然，我们也可以在`decision`上进行模式匹配：
+
+```js
+switch (decision) {
+| Yes => "Let's go."
+| No => "I'm staying here."
+| Maybe => "Convince me."
+};
+```
+
+如果我们忘记处理一个情况，编译器会警告我们：
+
+```js
+switch (decision) {
+| Yes => "Let's go."
+| No => "I'm staying here."
+};
+
+/*
+  Warning number 8
+
+  You forgot to handle a possible value here, for example: 
+  Maybe
+*/
+```
+
+在第二章中，我们将学习*设置开发环境*，编译器可以配置为将此警告转换为错误。让我们看一种方法，通过利用这些穷尽性检查来帮助使我们的代码更具弹性，以应对未来的重构。
+
+接下来的例子中，我们的任务是根据座位的区域来计算音乐会场地的座位价格。地板座位价格为 55 美元，而其他座位价格为 45 美元：
+
+```js
+type seat =
+  | Floor
+  | Mezzanine
+  | Balcony;
+
+let getSeatPrice = (seat) =>
+  switch(seat) { 
+  | Floor => 55
+  | _ => 45
+  };
+```
+
+如果以后音乐会场地允许在管弦乐区出售座位，价格为 65 美元，我们首先会向`seat`添加另一个构造函数：
+
+```js
+type seat =
+  | Pit
+  | Floor
+  | Mezzanine
+  | Balcony;
+```
+
+然而，由于使用了通配符`_`，我们的编译器在此更改后没有投诉。如果它这样做会更好，因为这将在重构过程中帮助我们。在更改类型定义后，逐步浏览编译器消息是 Reason（以及 ML 语言系列）如何使重构和扩展代码成为一个更安全、更愉快的过程。当然，这不仅限于变体类型。向`person`类型添加另一个字段也会导致相同的逐步浏览编译器消息的过程。
+
+相反，我们应该保留使用`_`来处理无限数量的情况（例如我们的`fizzbuzz`示例）。我们可以重构`getSeatPrice`以使用显式情况：
+
+```js
+let getSeatPrice = (seat) =>
+  switch(seat) { 
+  | Floor => 55
+  | Mezzanine | Balcony => 45
+  };
+```
+
+在这里，我们欢迎编译器友好地通知我们未处理的情况，然后添加它：
+
+```js
+let getSeatPrice = (seat) =>
+  switch(seat) {
+  | Pit => 65
+  | Floor => 55
+  | Mezzanine | Balcony => 45
+  };
+```
+
+现在让我们想象，即使在同一区域的座位（即具有相同标签的座位）也可以有不同的价格。好吧，Reason 变体也可以保存数据：
+
+```js
+type seat =
+  | Pit(int)
+  | Floor(int)
+  | Mezzanine(int)
+  | Balcony(int);
+
+let seat = Floor(57);
+```
+
+我们可以使用模式匹配访问这些数据：
+
+```js
+let getSeatPrice = (seat) =>
+  switch (seat) {
+  | Pit(price)
+  | Floor(price)
+  | Mezzanine(price)
+  | Balcony(price) => price
+  };
+```
+
+变体不仅限于一个数据。假设我们希望我们的`seat`类型存储其价格以及它是否仍然可用。如果不可用，它应该存储持票人的信息：
+
+```js
+type person = {
+  age: int,
+  name: string,
+};
+
+type seat =
+  | Pit(int, option(person))
+  | Floor(int, option(person))
+  | Mezzanine(int, option(person))
+  | Balcony(int, option(person));
+```
+
+在解释`option`类型之前，让我们看一下它的实现：
+
+```js
+type option('a)
+  | None
+  | Some('a);
+```
+
+上述代码中的`'a`称为**类型变量**。类型变量总是以`'`开头。这种类型定义使用类型变量，以便它可以适用于任何类型。如果没有，我们将需要创建一个`personOption`类型，它只适用于`person`类型：
+
+```js
+type personOption(person)
+  | None
+  | Some(person);
+```
+
+如果我们想要另一种选项呢？我们可以声明一个多态类型，而不是一遍又一遍地重复这个类型声明。多态类型是包含类型变量的类型。在我们的例子中，`'a`（读作 alpha）类型变量将与`person`交换。由于这种类型定义非常常见，Reason 的标准库中已经包含了它，所以在你的代码中不需要声明`option`类型。
+
+回到我们的`seat`示例，我们将其价格存储为`int`，持票人存储为`option(person)`。如果没有持票人，它仍然可用。我们可以有一个`isAvailable`函数，它将接受一个`seat`并返回一个`bool`：
+
+```js
+let isAvailable = (seat) =>
+  switch (seat) {
+  | Pit(_, None)
+  | Floor(_, None)
+  | Mezzanine(_, None)
+  | Balcony(_, None) => true
+  | _ => false
+  };
+```
+
+让我们退一步，看看`getSeatPrice`和`isAvailable`的实现。很遗憾，当它们与座位的价格或可用性无关时，这两个函数都需要知道不同的构造函数。再看一下我们的`seat`类型，我们发现对于每个构造函数，`(int, option(person))`都是重复的。此外，在`isAvailable`中没有一个很好的方法来避免使用`_`情况。这些都是另一种类型定义可能更好地满足我们需求的迹象。让我们从`seat`类型中删除参数，并将其重命名为`section`。我们将声明一个新的记录类型，称为`seat`，其中包含`section`、`price`和`person`字段：
+
+```js
+type person = {
+  age: int,
+  name: string,
+};
+
+type section =
+ | Pit
+ | Floor
+ | Mezzanine
+ | Balcony;
+
+type seat = {
+  section, /* same as section: section, */
+  price: int,
+  person: option(person)
+};
+
+let getSeatPrice = seat => seat.price;
+
+let isAvailable = seat =>
+  switch (seat.person) {
+  | None => true
+  | Some(_person) => false
+  };
+```
+
+现在，我们的`getSeatPrice`和`isAvailable`函数的信噪比更高，当`section`类型发生变化时，它们不需要改变。
+
+顺便说一句，`_`用于在变量前加前缀，以防止编译器警告我们未使用变量。
+
+# 使无效状态不可能
+
+假设我们想要向`seat`添加一个字段来保存座位购买日期：
+
+```js
+type seat = {
+  section,
+  price: int,
+  person: option(person),
+  dateSold: option(string)
+};
+```
+
+现在，我们在我们的代码中引入了一个无效状态的可能性。以下是这种状态的一个例子：
+
+```js
+let seat = {
+  section: Pit,
+  price: 42,
+  person: None,
+  dateSold: Some("2018-07-16")
+};
+```
+
+理论上，`dateSold`字段应该只在`person`字段持有票持有者时保存日期。票有一个售出日期，但没有所有者。我们可以查看我们的想象实现，以验证这种状态永远不会发生，但仍然有可能我们遗漏了一些东西，或者一些微小的重构引入了一个被忽视的错误。
+
+由于我们现在可以利用 Reason 的类型系统的功能，让我们把这项工作交给编译器。我们将使用类型系统来强制执行代码中的不变量。如果我们的代码违反这些规则，它将无法编译。
+
+一个暗示这种无效状态可能存在的信号是在我们的记录字段中使用`option`类型。在这些情况下，可能有一种方法可以使用变体，使得每个构造函数只包含相关的数据。在我们的情况下，我们的售出日期和持票人数据应该只在座位被售出时存在：
+
+```js
+type person = {
+  age: int,
+  name: string,
+};
+
+type date = string;
+
+type section =
+  | Pit
+  | Floor
+  | Mezzanine
+  | Balcony;
+
+type status =
+  | Available
+  | Sold(date, person);
+
+type seat = {
+  section,
+  price: int,
+  status
+};
+
+let getSeatPrice = (seat) => seat.price;
+
+let isAvailable = (seat) =>
+  switch (seat.status) {
+  | Available => true
+  | Sold(_) => false
+  };
+```
+
+看看我们的新`status`类型。`Available`构造函数不包含数据，`Sold`包含售出日期以及持票人。
+
+有了这个`seat`类型，就没有办法表示之前的无效状态，即没有票持有者的售出日期。我们的`seat`类型也不再包含`option`类型，这是一个好迹象。
+
+# 摘要
+
+在本章中，我们对 Reason 是什么以及它试图解决什么问题有了一定的了解。我们看到 Reason 的类型推断消除了与静态类型语言相关的许多负担。我们了解到类型系统是一个可以用来为代码库提供强大保证的工具，从而提供出色的开发者体验。虽然可能需要一些时间来适应 Reason，但对于中等规模到较大规模的代码库来说，这是非常值得投资的。
+
+在下一章中，当我们设置开发环境时，我们将了解 Reason 的工具链。在第三章《创建 ReasonReact 组件》中，我们将开始构建一个应用程序，这个应用程序将贯穿本书的其余部分。通过本书的学习，您将能够在 Reason 中轻松构建真实世界的 React 应用程序。
+
+
+# 第二章：设置开发环境
+
+除了作为 OCaml 的新语法之外，Reason 还是一个工具链，可以让我们轻松入门。在本章中，我们将做以下事情：
+
++   了解 Reason 工具链
+
++   配置我们的编辑器
+
++   使用 `bsb` 启动一个纯 Reason 项目
+
++   了解 `bsconfig.json`
+
++   编写一个操作 DOM 的纯 Reason 应用程序示例
+
++   使用 `bsb` 启动一个 ReasonReact 项目
+
++   在 Reason 项目中熟悉使用 `webpack`
+
+要跟着做，请克隆本书的 GitHub 存储库，并从本章的目录开始。您也可以从一个空白项目开始：
+
+```js
+git clone https://github.com/PacktPublishing/ReasonML-Quick-Start-Guide.git
+cd ReasonML-Quick-Start-Guide
+cd Chapter02/pure-reason-start
+npm install
+```
+
+本章旨在让您熟悉 Reason 工具链。我们将为纯 Reason 项目和 ReasonReact 项目分别设置开发环境。跟着做一遍后，您将足够熟悉来调整开发环境以满足您的喜好。不用担心搞砸了什么，因为我们将在另一个目录中从零开始，即 第三章 *创建 ReasonReact 组件*。
+
+# Reason 工具链
+
+在撰写本文时，Reason 工具链本质上是 BuckleScript—Reason 的合作项目—和熟悉的 JavaScript 工具链，即 `npm` 和 `webpack`（或其他 JavaScript 模块打包工具）。
+
+由于 BuckleScript 编译成了 ES5 版本的 JavaScript，所以不再需要 `babel`。编译输出可以配置为使用 CommonJS、AMD 或 ES 模块格式。Reason 强大的静态类型系统取代了 Flow 和 ESlint 的需求。此外，Reason 的编辑器插件都带有 `refmt`，这本质上就是 Reason 的 `prettier`。
+
+# 安装 BuckleScript
+
+BuckleScript 是一个编译器，它接受 OCaml AST 并生成干净、可读和高性能的 JavaScript。可以通过 `npm` 安装它，如下所示：
+
+```js
+npm install -g bs-platform
+```
+
+安装 `bs-platform` 提供了一个名为 `bsb` 的二进制文件，这是 BuckleScript 的构建系统。
+
+未来，Reason 工具链将大大简化针对本机平台和 JavaScript 的目标。目前，Reason 通过使用名为 `bsb-native` 的 `bsb` 分支编译为本机代码。
+
+# 编辑器配置
+
+Reason 支持各种编辑器，包括 VSCode、Sublime Text、Atom、Vim 和 Emacs。推荐使用 VSCode。要配置 VSCode，只需安装 `reason-vscode` 扩展即可。
+
+请参阅编辑器特定的说明文档。
+
+Reason 编辑器支持文档可以在 [`reasonml.github.io/docs/editor-plugins`](https://reasonml.github.io/docs/editor-plugins) 找到。
+
+# 设置一个纯 Reason 项目
+
+`bsb` 二进制文件包括一个项目生成器。我们将使用它使用 `basic-reason` 主题创建一个纯 Reason 项目。运行 `bsb -themes` 以查看所有可用的项目模板：
+
+```js
+Available themes: 
+basic
+basic-reason
+generator
+minimal
+node
+react
+react-lite
+tea
+```
+
+由于 BuckleScript 可以与 OCaml 和 Reason 一起使用，因此有些主题仅适用于 OCaml 项目。也就是说，可以在任何 BuckleScript 项目中自由混合 OCaml 的 `.ml` 文件和 Reason 的 `.re` 文件。
+
+在本章中，我们将专注于使用 `basic-reason` 和 `react` 模板。如果您感兴趣，`react-lite` 主题类似于 `react`，只是用一个更简单、更快速、更可靠的模块打包工具替换了 `webpack`，该模块打包工具仅用于开发目的。
+
+让我们首先创建一个纯 Reason 项目：
+
+```js
+bsb -init my-first-app -theme basic-reason
+cd my-first-app
+```
+
+当我们在编辑器中打开项目时，我们看到以下项目结构：
+
+```js
+├── .gitignore
+├── README.md
+├── bsconfig.json
+├── node_modules
+│   ├── .bin
+│   │   ├── bsb
+│   │   ├── bsc
+│   │   └── bsrefmt
+│   └── bs-platform
+├── package.json
+└── src
+    └── Demo.re
+```
+
+总的来说，这里没有太多东西，这在从 JavaScript 转过来的人来说有点令人耳目一新。在 `node_modules` 中，我们看到了 `bs-platform` 以及一些二进制文件：
+
++   `bsb`：构建系统
+
++   `bsc`：编译器
+
++   `bsrefmt`：这本质上就是 JavaScript 的 `prettier`，但用于 Reason。
+
+正如我们将很快看到的，`bsb` 二进制文件在 `npm` 脚本中使用。`bsc` 二进制文件很少直接使用。`bsrefmt` 二进制文件被编辑器插件使用。
+
+在 `Demo.re` 中，我们看到一个简单的日志消息：
+
+```js
+/* Demo.re */
+Js.log("Hello, BuckleScript and Reason!");
+```
+
+`package.json` 看起来有点熟悉。`scripts` 字段显示了我们当前可用的 `npm` 脚本：
+
+```js
+/* package.json */
+{
+  "name": "my-first-app",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "bs-platform": "⁴.0.5"
+  }
+}
+```
+
+运行`npm run build`将`Demo.re`编译为 JavaScript。默认情况下，编译输出会出现在源文件旁边，名称为`Demo.bs.js`。它是如何知道要编译哪些文件，以及在哪里输出它们的？这就是`bsconfig.json`的作用。
+
+# bsconfig.json 文件
+
+`bsconfig.json`文件是所有 BuckleScript 项目的必需文件。让我们来探索一下：
+
+```js
+// This is the configuration file used by BuckleScript's build system bsb. Its documentation lives here: http://bucklescript.github.io/bucklescript/docson/#build-schema.json
+// BuckleScript comes with its own parser for bsconfig.json, which is normal JSON, with the extra support of comments and trailing commas.
+{
+  "name": "my-first-app",
+  "version": "0.1.0",
+  "sources": {
+    "dir" : "src",
+    "subdirs" : true
+  },
+  "package-specs": {
+    "module": "commonjs",
+    "in-source": true
+  },
+  "suffix": ".bs.js",
+  "bs-dependencies": [
+      // add your dependencies here. You'd usually install them normally through `npm install my-dependency`. If my-dependency has a bsconfig.json too, then everything will work seamlessly.
+  ],
+  "warnings": {
+    "error" : "+101"
+  },
+  "namespace": true,
+  "refmt": 3
+}
+```
+
+我们很快将更改其中一些默认值，以便更加熟悉 BuckleScript 的配置文件。让我们首先将以下代码添加到`Demo.re`中：
+
+```js
+type decision =
+  | Yes
+  | No
+  | Maybe;
+
+let decision = Maybe;
+
+let response =
+  switch (decision) {
+  | Yes => "Yes!"
+  | No => "I'm afraid not."
+  };
+
+Js.log(response);
+```
+
+正如您所看到的，`switch`表达式没有处理所有`decision`的可能情况。运行`npm run build`的结果如下：
+
+```js
+ninja: Entering directory `lib/bs'
+[3/3] Building src/Demo.mlast.d
+[1/1] Building src/Demo-MyFirstApp.cmj
+
+  Warning number 8
+  .../Demo.re 9:3-12:3
+
+   7 │ 
+   8 │ let response =
+   9 │ switch (decision) {
+  10 │ | Yes => "Yes!"
+  11 │ | No => "I'm afraid not."
+  12 │ };
+  13 │ 
+  14 │ Js.log(response);
+
+  You forgot to handle a possible value here, for example: 
+Maybe
+```
+
+# 警告字段
+
+如果我们想要强制此警告抛出错误，我们可以注意到前面片段中的错误编号，并将`bsconfig.json`的`warnings`字段更改为以下内容：
+
+```js
+"warnings": {
+  "error": "+101+8" // added "+8"
+},
+```
+
+要将所有警告转换为错误，请使用以下代码：
+
+```js
+"warnings": {
+  "error": "A"
+},
+```
+
+有关警告编号的完整列表，请查看[`caml.inria.fr/pub/docs/manual-ocaml/comp.html#sec281`](https://caml.inria.fr/pub/docs/manual-ocaml/comp.html#sec281)（向下滚动一点）。
+
+# 包规范字段
+
+`package-specs`字段包含两个字段：`module`和`in-source`。
+
+`module`字段控制 JavaScript 模块格式。默认值为`commonjs`，其他可用选项包括`amdjs`、`amdjs-global`、`es6`和`es6-global`。`-global`部分告诉 BuckleScript 将`node_modules`解析为浏览器的相对路径。
+
+`in-source`字段控制生成的 JavaScript 文件的目标；`true`会导致生成的文件放在源文件旁边，`false`会导致生成的文件放在`lib/js`中。将`in-source`设置为`false`对于在现有 JavaScript 项目中使用 Reason 非常有用，这样就可以在不进行更改的情况下使用现有的构建流程。
+
+让我们暂时使用`"es6"`模块格式，并将编译后的资产放在`lib/js`中：
+
+```js
+"package-specs": {
+  "module": "es6",
+  "in-source": false
+},
+```
+
+# 后缀字段
+
+`suffix`字段配置生成的 JavaScript 文件的扩展名。通常最好保留`".bs.js"`后缀，因为这有助于`bsb`更好地跟踪生成的工件。
+
+# 来源字段
+
+BuckleScript 知道要查找`src`目录，是因为以下配置：
+
+```js
+"sources": {
+  "dir" : "src",
+  "subdirs" : true
+},
+```
+
+如果`subdirs`为`false`，则`src`子目录中的任何`.re`和`.ml`文件都不会被编译。
+
+有关`bsconfig.json`的更多信息，请参阅 BuckleScript 文档的以下部分：[`bucklescript.github.io/docs/build-configuration`](https://bucklescript.github.io/docs/build-configuration)。
+
+# 使用 DOM
+
+在跳入 ReasonReact 之前，让我们尝试在纯 Reason 中使用 DOM。我们将编写一个模块，执行以下操作：
+
++   创建一个 DOM 元素
+
++   设置该元素的`innerText`
+
++   将该元素附加到文档的主体
+
+在项目的根目录中创建一个`index.html`文件，内容如下：
+
+```js
+<html>
+  <head></head>
+  <body>
+    <!-- if "in-source": false -->
+    <script type="module" src="img/Demo.bs.js"></script>
+
+    <!-- if "in-source": true -->
+    <!-- <script type="module" src="img/Demo.bs.js"></script> -->
+  </body>
+</html>
+```
+
+注意`script`标签上的`type="module"`属性。如果所有模块依赖项都符合**ES Module**（**ESM**）规范，并且它们都可以在浏览器内使用，那么您就不需要模块捆绑器来开始（假设您使用支持 ES 模块的浏览器）。
+
+在`Greeting.re`中，添加以下问候函数：
+
+```js
+let greeting = name => {j|hello $name|j};
+```
+
+在`Demo.re`中，添加以下代码：
+
+```js
+[@bs.val] [@bs.scope "document"]
+external createElement : string => Dom.element = "";
+
+[@bs.set] external setInnerText : (Dom.element, string) => unit = "innerText";
+
+[@bs.val] [@bs.scope "document.body"]
+external appendChild : Dom.element => Dom.element = "";
+
+let div = createElement("div");
+setInnerText(div, Greeting.greeting("world"));
+appendChild(div);
+```
+
+使用 BuckleScript 强大的互操作功能（我们将在第四章中深入探讨），上述代码绑定到现有的浏览器 API，即`document.createElement`、`innerText`和`document.body.appendChild`，然后使用这些绑定创建一个带有一些文本的`div`，并将其附加到文档的主体。
+
+运行`npm run build`，启动服务器（也许可以在新的控制台选项卡中使用`php -S localhost:3000`），然后导航到`http://localhost:3000`，以查看我们新创建的 DOM 元素：
+
+![](https://github.com/OpenDocCN/freelearn-js-zh/raw/master/docs/rsnml-qk-st-gd/img/7b54adea-c4aa-49c7-8222-63c1556608c3.png)
+
+重点是以这种方式使用 DOM 真的很繁琐。由于 JavaScript 的动态特性，很难输入 DOM API。例如，`Element.innerText`根据使用方式用于获取和设置元素的`innerText`，因此会导致两种不同的类型签名：
+
+```js
+[@bs.get] external getInnerText: Dom.element => string = "innerText";
+[@bs.set] external setInnerText : (Dom.element, string) => unit = "innerText";
+```
+
+幸运的是，我们有 React，它在很大程度上为我们抽象了 DOM。使用 React，我们不需要担心输入 DOM API。当我们想要与各种浏览器 API 交互时，很高兴知道 BuckleScript 有我们需要完成工作的工具。虽然在纯 Reason 中编写前端 Web 应用程序是完全可能的，但使用 ReasonReact 时体验会更加愉快，特别是在初次使用 Reason 时。
+
+# 设置 ReasonReact 项目
+
+要创建一个新的 ReasonReact 项目，请运行以下命令：
+
+```js
+bsb -init my-reason-react-app -theme react
+cd my-reason-react-app
+
+```
+
+打开文本编辑器后，我们看到有一些变化。`package.json`文件列出了相关的 React 和 webpack 依赖项。让我们安装它们：
+
+```js
+npm install
+```
+
+我们还有以下与 webpack 相关的 npm 脚本：
+
+```js
+"webpack": "webpack -w",
+"webpack:production": "NODE_ENV=production webpack"
+```
+
+在`bsconfig.json`中，我们有一个新字段，用于为 ReasonReact 启用 JSX：
+
+```js
+"reason": {
+  "react-jsx": 2
+},
+```
+
+我们有一个简单的`webpack.config.js`文件：
+
+```js
+const path = require("path");
+const outputDir = path.join(__dirname, "build/");
+
+const isProd = process.env.NODE_ENV === "production";
+
+module.exports = {
+  entry: "./src/Index.bs.js",
+  mode: isProd ? "production" : "development",
+  output: {
+    path: outputDir,
+    publicPath: outputDir,
+    filename: "Index.js"
+  }
+};
+```
+
+请注意，配置的入口点是`"./src/Index.bs.js"`，这是有道理的，因为在`bsconfig.json`中默认情况下`"in-source"`设置为`true`。其余部分都是正常的 webpack 内容。
+
+要运行这个项目，我们需要同时运行`bsb`和`webpack`：
+
+```js
+npm start
+
+/* in another shell */
+npm run webpack
+
+/* in another shell */
+php -S localhost:3000
+```
+
+由于`index.html`文件位于`src`目录中，我们访问`http://localhost:3000/src`来查看默认应用程序。
+
+# 改善开发者体验
+
+现在我们已经了解了工具链在基本层面上的工作原理，让我们改善开发者体验，以便我们可以用一个命令启动我们的项目。我们需要安装一些依赖项，如下所示：
+
+```js
+npm install webpack-dev-server --save-dev
+npm install npm-run-all --save-dev
+```
+
+现在，我们可以更新我们的 npm 脚本：
+
+```js
+"scripts": {
+  "start": "npm-run-all --parallel start:*",
+  "start:bsb": "bsb -clean-world -make-world -w",
+  "start:webpack": "webpack-dev-server --port 3000",
+  "build": "npm-run-all build:*",
+  "build:bsb": "bsb -clean-world -make-world",
+  "build:webpack": "NODE_ENV=production webpack",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
+```
+
+接下来，为了让`webpack-dev-server`在`http://localhost:3000`上提供`index.html`文件，而不是`http://localhost:3000/src`，我们需要安装并配置`HtmlWebpackPlugin`：
+
+```js
+npm install html-webpack-plugin --save-dev
+```
+
+我们可以在`src/index.html`中删除默认的`<script src="img/Index.js"></script>`标签，因为`HTMLWebpackPlugin`会自动插入脚本标签。
+
+我们还删除了`publicPath`设置，以便使用`"/"`的默认路径：
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+const isProd = process.env.NODE_ENV === "production";
+
+module.exports = {
+  entry: "./src/Index.bs.js",
+  mode: isProd ? "production" : "development",
+  output: {
+    path: path.join(__dirname, "build/"),
+    filename: "Index.js"
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./src/index.html"
+    })
+  ]
+};
+```
+
+现在，我们运行`npm start`并访问`http://localhost:3000`，看到相同的 ReasonReact 应用程序正在运行。
+
+# 总结
+
+在本章中，我们看到了使用 Reason 开始的简单程度。在第三章 *创建 ReasonReact 组件*中，我们将开始构建一个 ReasonReact 应用程序，这个应用程序将贯穿本书。这个应用程序将帮助我们在学习更多关于 Reason 语义、BuckleScript 互操作性和 ReasonReact 特定内容时提供上下文。
+
+如果您还不理解这些生成的项目中的所有内容，请不要担心。在第三章 *创建 ReasonReact 组件*结束时，您会感到更加舒适。但是，如果您在学习过程中有问题，请随时在 Reason 的 Discord 频道上寻求实时帮助：[`discord.gg/reasonml`](https://discord.gg/reasonml)。
+
+我希望您会像我一样觉得 Reason 社区是如此的友好和乐于助人。
+
+
+# 第三章：创建 ReasonReact 组件
+
+现在我们已经设置好了开发环境，我们准备开始使用 ReasonReact——ReactJS 的未来。ReasonML 和 ReasonReact 都是由构建 ReactJS 的同一个人构建的。ReasonReact 就是 Reason，就像 ReactJS 就是 JavaScript 一样。在本书的其余部分，我们将使用在本章开始构建的应用程序。以下是本章结束时我们将构建的内容的截图：
+
+![](https://github.com/OpenDocCN/freelearn-js-zh/raw/master/docs/rsnml-qk-st-gd/img/b88262e1-bf4b-4508-aa96-84b090a76664.png)
+
+要跟着做，克隆这本书的 GitHub 存储库，并从`Chapter03/start`开始。在本书的其余部分，每个目录都与我们在第二章结束时设置的开发环境相同。
+
+```js
+git clone https://github.com/PacktPublishing/ReasonML-Quick-Start-Guide.git
+cd ReasonML-Quick-Start-Guide
+cd Chapter03/start
+npm install
+```
+
+我们将首先探索 ReasonReact，并且在本章的中间部分，我们将转移到`Chapter03/app-start`目录，在那里我们将开始使用 ReasonReact 的内置路由器构建应用程序。
+
+在本章中，我们将做以下事情：
+
++   探索创建无状态和有状态的 ReasonReact 组件
+
++   创建一个包括导航和路由的应用程序
+
++   看看你已经熟悉的这么多 ReactJS 概念如何很好地映射到 ReasonReact
+
++   了解 ReasonReact 如何通过 Reason 的类型系统帮助我们创建更健壮的组件
+
+# 组件创建基础知识
+
+让我们从分析一个简单的无状态组件开始。在`App.re`中，让我们呈现一个带有一些文本的`<div />`元素：
+
+```js
+let component = ReasonReact.statelessComponent("App");
+
+let make = _children => {
+  ...component,
+  render: _self => <div> {ReasonReact.string("hello world")} </div>,
+};
+```
+
+并在`Index.re`中，将组件呈现到 ID 为`"root"`的 DOM 元素：
+
+```js
+ReactDOMRe.renderToElementWithId(<App />, "root");
+```
+
+由于 Reason 的模块系统，我们不需要在`Index.re`中使用`import`语句，也不需要在`App.re`中使用导出语句。每个 Reason 文件都是一个模块，每个 Reason 模块都是全局可用的。在本书的后面，我们将看到如何隐藏模块的实现细节，以便您组件的用户只能访问他们应该访问的内容。
+
+# 组件模板
+
+在 ReasonReact 中，所有组件都是使用以下四个函数之一创建的：
+
++   `ReasonReact.statelessComponent`
+
++   `ReasonReact.statelessComponentWithRetainedProps`
+
++   `ReasonReact.reducerComponent`
+
++   `ReasonReact.reducerComponentWithRetainedProps`
+
+这四个函数中的每一个都接受一个`string`并返回与不同组件模板对应的`record`。`string`参数仅用于调试目的。组件的名称(`<App />`)来自其文件名(`App.re`)。返回的记录包含的字段取决于使用了哪个函数。在我们之前的例子中，我们可以覆盖以下字段：
+
++   `render`
+
++   `didMount`
+
++   `willReceiveProps`
+
++   `shouldUpdate`
+
++   `willUpdate`
+
++   `didUpdate`
+
++   `willUnmount`
+
+除了`render`字段外，其余的都是熟悉的 ReactJS 生命周期事件。要覆盖一个字段，在`make`函数返回的`record`中添加该字段。在前面的例子中，组件模板的`render`字段被自定义的`render`函数替换了。
+
+`make`函数接受`props`作为参数，并返回与四个组件创建函数之一最初创建的形状相同的`record`。`make`函数的最后一个参数必须是`children`属性。您可能已经注意到，在前面的例子中，`children`前缀为`_`。如果您的组件不需要引用 children 属性，则使用`_`前缀可以防止未使用绑定的编译器警告。
+
+`make`函数的花括号属于返回的`record`文字。`...component`表达式将原始`record`的内容扩展到这个新的`record`中，以便可以覆盖单个字段，而无需显式设置每个字段。
+
+# self
+
+`render`字段保存一个接受名为`self`的参数的回调函数，并返回类型为`ReasonReact.reactElement`的值。`self`记录的三个字段如下：
+
++   `state`
+
++   `handle`
+
++   `send`
+
+ReasonReact 不具有 JavaScript 的`this`的概念。相反，`self`保存必要的信息，并提供给需要它的回调函数。在使用有状态组件时，我们将看到更多关于`self`的内容。
+
+# 事件处理程序
+
+在我们的渲染函数中，我们可以以与 ReactJS 相同的方式将事件侦听器附加到 DOM 元素上。例如，要监听点击事件，我们添加一个`onClick`属性并将其值设置为事件处理程序：
+
+```js
+let component = ReasonReact.statelessComponent("App");
+
+let make = _children => {
+  ...component,
+  render: _self =>
+    <div onClick={_event => Js.log("clicked")}>
+      {ReasonReact.string("hello world")}
+    </div>,
+};
+```
+
+但是，这个回调函数必须接受一个参数（对应于 JavaScript DOM 事件）并且必须返回一个名为`unit`的类型。
+
+# unit
+
+在 Reason 中，`unit`是一个表示"nothing"的类型。返回类型为`unit`的函数除了`unit`之外不能返回任何其他值。`unit`类型有一个值：`()`（即一对空括号，也称为`unit`）。
+
+相比之下，`bool`类型有两个值：`true`和`false`。`int`类型有无限多个值。
+
+在第一章中讨论了*ReasonML 简介*，在 Reason 中表示可空值的习惯方式是使用`option`类型。`option`类型和`unit`类型之间的主要区别在于`option`类型的值可以是空，也可以是某个值，而`unit`类型的值始终是`()`。
+
+接受和/或返回`unit`的函数可能会引起副作用。例如，`Js.log`是一个返回`unit`的函数。`onClick`事件处理程序也是一个返回`unit`的函数。
+
+`Random.bool`是一个接受`unit`作为参数并返回`bool`的函数的示例。调用带有`unit`的函数的语法非常熟悉：
+
+```js
+Random.bool()
+```
+
+由于`onClick`需要一个返回`unit`的函数，以下内容将导致类型错误：
+
+```js
+let component = ReasonReact.statelessComponent("App");
+
+let make = _children => {
+  ...component,
+  render: _self =>
+    <div onClick={_event => 42}> {ReasonReact.string("hello world")} </div>,
+};
+```
+
+类型错误显示在这里：
+
+```js
+Error: This expression has type int but an expression was expected of type
+  unit
+```
+
+在错误消息中，`This expression`指的是`42`。
+
+# JSX
+
+Reason 带有 JSX 语法。ReasonReact 版本的 JSX 的一个区别是我们不能在 ReasonReact 中执行以下操作：
+
+```js
+<div>"hello world"</div>
+```
+
+相反，我们需要使用`ReasonReact.string`函数将`string`转换为`ReasonReact.reactElement`：
+
+```js
+<div>ReasonReact.string("hello world")</div>
+```
+
+但是，这仍然不起作用。我们还需要用`{ }`来包装表达式，以帮助解析器区分多个可能的子元素：
+
+```js
+<div> {ReasonReact.string("hello world")} </div>
+```
+
+您可以自由创建一个更简洁的别名并使用它：
+
+```js
+let str = ReasonReact.string;
+<div> {str("hello world")} </div>;
+```
+
+在 JSX 中调用自定义组件时，将调用其`make`函数。`<App />`语法解糖为以下内容：
+
+```js
+ReasonReact.element(App.make([||]))
+```
+
+当组件将接收新的 props 时，它的`make`函数将再次被调用，并将新的 props 作为参数。`make`函数就像 ReactJS 的`constructor`和 ReactJS 的`componentWillReceiveProps`的组合。
+
+# Props
+
+让我们给我们的`<App />`组件添加一些 props：
+
+```js
+let make = (~greeting, ~name, _children) => {
+  ...component,
+  render: _self => <div> {ReasonReact.string(greeting ++ " " ++ name)} </div>,
+};
+```
+
+编译后，我们得到了一个编译器错误，因为在`Index.re`中我们没有提供所需的`greeting`和`name`属性：
+
+```js
+We've found a bug for you!
+
+1 │ ReactDOMRe.renderToElementWithId(<App />, "root");
+
+This call is missing arguments of type:
+(~greeting: string),
+(~name: string)
+```
+
+`greeting`和`name`是`make`函数的**标记参数**，这意味着它们可以以任何顺序提供。要将参数转换为标记参数，请使用波浪号(`~`)作为前缀。Reason 还支持可选参数以及带默认值的参数。让我们给`greeting`一个默认值并使`name`可选：
+
+```js
+let make = (~greeting="hello", ~name=?, _children) => {
+  ...component,
+  render: _self => {
+    let name =
+      switch (name) {
+      | None => ""
+      | Some(name) => name
+      };
+    <div> {ReasonReact.string(greeting ++ " " ++ name)} </div>;
+  },
+};
+```
+
+由于`name`是一个可选参数，它被包装在`option`类型中，然后我们可以对其值进行模式匹配。当然，这只是一种提供`name`默认参数为`""`的冗长方式。
+
+现在，即使未为`<App />`提供任何 props，我们的示例也可以编译：
+
+```js
+ReactDOMRe.renderToElementWithId(<App />, "root");
+/* hello */
+
+ReactDOMRe.renderToElementWithId(
+  <App greeting="welcome," name="reason" />,
+  "root",
+);
+/* welcome, reason */
+
+```
+
+如果我们决定删除名称属性，编译器将告诉我们需要更新`<App />`的使用位置。这使我们可以自由地重构我们的组件，而不必担心忘记更新代码库中的某个区域。编译器支持我们！
+
+# 子元素
+
+`make`函数的最后一个参数始终是`children`属性-它是强制性的。与其他属性一样，子元素可以是任何数据结构。只要组件允许，我们就可以使用在 ReactJS 中流行的渲染属性模式。重要的是，ReasonReact 始终将子元素包装在数组中，因此如果我们不想要这种包装，就需要使用`...`语法来解包数组。
+
+在`App.re`中，我们将删除除了必需的`children`属性之外的所有属性。在渲染函数中，我们使用我们硬编码的问候语调用子元素：
+
+```js
+/* App.re */
+let component = ReasonReact.statelessComponent("App");
+
+let make = children => {
+  ...component,
+  render: _self => children("hello"),
+};
+```
+
+在`Index.re`中，我们添加一个作为`<App />`子元素的函数，该函数接受提供的问候并返回 JSX（类型为`ReasonReact.reactElement`）。请注意`...`语法用于解包所有 ReasonReact 子元素都包装在其中的数组：
+
+```js
+/* Index.re */
+ReactDOMRe.renderToElementWithId(
+  <App> ...{greeting => <div> {ReasonReact.string(greeting)} </div>} </App>,
+  "root",
+);
+```
+
+如果我们忘记了`...`，编译器会友好地提醒我们：
+
+```js
+We've found a bug for you!
+
+1 │ ReactDOMRe.renderToElementWithId(
+2 │ <App> {greeting => <div> {ReasonReact.string(greeting)} </div>} </App>,
+3 │ "root",
+4 │ );
+
+This has type:
+  array('a)
+But somewhere wanted:
+  string => ReasonReact.reactElement
+```
+
+如果我们不包含任何子元素（即只有`<App />`），甚至会收到类似的编译器消息，因为这会转换为空数组。这意味着我们保证组件的用户必须在`<App />`的子元素中提供类型为`string => ReasonReact.reactElement`的函数，如果它要进行类型检查的话。
+
+我们还可以要求我们的组件接受其他类型的子元素，例如两个字符串的元组：
+
+```js
+/* App.re */
+let component = ReasonReact.statelessComponent("App");
+
+let make = children => {
+  ...component,
+  render: _self => {
+    let (greeting, name) = children;
+    <div> {ReasonReact.string(greeting ++ " " ++ name)} </div>;
+  },
+};
+/* Index.re */
+ReactDOMRe.renderToElementWithId(<App> ...("hello", "tuple") </App>, "root");
+```
+
+由于在`App.re`中使用了它，Reason 能够推断出子元素必须是类型为`(string, string)`的元组。例如，考虑以下用法：
+
+```js
+ReactDOMRe.renderToElementWithId(<App> ("hello") </App>, "root");
+```
+
+这将导致友好的编译器错误，因为`App`组件要求其子元素是一个元组，但`App`组件的子元素不是元组。
+
+```js
+We've found a bug for you!
+
+1 │ ReactDOMRe.renderToElementWithId(<App> ("hello") </App>, "root");
+
+This has type:
+  array('a)
+But somewhere wanted:
+  (string, string)
+```
+
+这非常强大。由于我们在编译时获得了这些保证，因此我们不必担心组件子元素的形状是否符合运行时检查。同样，我们保证了属性在编译时进行类型检查。重构组件变得不那么紧张，因为编译器会指导我们。更重要的是，由于 Reason 的强大类型推断，到目前为止我们还没有必须明确注释任何类型。
+
+# 生命周期
+
+ReasonReact 支持熟悉的 ReactJS 生命周期事件。当我们构建我们的应用程序时，我们将更仔细地查看一些生命周期事件，但是现在，让我们看看如何为`<App />`实现 ReactJS 的`componentDidMount`生命周期挂钩：
+
+```js
+let make = _children => {
+  ...component,
+  didMount: _self => Js.log("mounted"),
+  render: _self => <div> {ReasonReact.string("hello")} </div>,
+};
+```
+
+我们使用`didMount`而不是`componentDidMount`。同样，`didMount`只是组件的`make`函数返回的记录中的一个字段。`didMount`的类型是`self => unit`，它是一个接受`self`并返回`unit`的函数。由于它返回`unit`，它很可能会导致副作用，在我们的示例中确实如此。在浏览器中运行结果会在控制台中记录`mounted`。
+
+# 订阅助手
+
+为了使编写清理代码更加方便和容易记忆，ReasonReact 提供了`self.onUnmount`，它可以直接在组件的`didMount`生命周期中使用（或者在任何可以访问`self`的地方）。这允许您将清理代码与其补充一起编写，而不是分开在`willUnmount`中：
+
+```js
+didMount: self => {
+  let intervalId = Js.Global.setInterval(() => Js.log("hello!"), 1000);
+  self.onUnmount(() => Js.Global.clearInterval(intervalId));
+},
+```
+
+# 有状态组件
+
+到目前为止，我们只使用了`ReasonReact.statelessComponent`模板。要创建一个有状态的组件，我们将组件模板切换为`ReasonReact.reducerComponent`，并覆盖其`make`函数返回的记录中的一些附加字段。很快我们将看到，我们还需要声明自定义类型定义以在这些附加字段中使用。它被称为`reducerComponent`，因为它具有状态、操作和内置的 reducer 的概念-就像 Redux 一样，只是状态、操作和 reducer 是局部的。
+
+这里显示了一个简单的计数器组件，带有增加和减少当前计数的按钮：
+
+```js
+type state = int;
+
+type action =
+  | Increment
+  | Decrement;
+
+let component = ReasonReact.reducerComponent("App");
+
+let make = _children => {
+  ...component,
+  initialState: () => 0,
+  reducer: (action, state) =>
+    switch (action) {
+    | Increment => ReasonReact.Update(state + 1)
+    | Decrement => ReasonReact.Update(state - 1)
+    },
+  render: self =>
+    <>
+      <button onClick={_event => self.send(Decrement)}>
+        {ReasonReact.string("-")}
+      </button>
+      <span> {ReasonReact.string(string_of_int(self.state))} </span>
+      <button onClick={_event => self.send(Increment)}>
+        {ReasonReact.string("+")}
+      </button>
+    </>,
+};
+```
+
+在这里使用了 ReactJS 片段语法（`<>`和`</>`）来包装`<button>`和`<span>`元素，而不添加不必要的 DOM 节点。
+
+# 状态、动作和减速器
+
+让我们来分解一下。在文件的顶部，我们看到了两个类型声明，一个是状态，一个是动作。`state`和`action`是一种约定，但您可以使用任何您喜欢的名称：
+
+```js
+type state = int;
+
+type action =
+  | Increment
+  | Decrement;
+```
+
+就像在 Redux 中一样，事件触发动作，这些动作被发送到一个减速器，然后更新状态。接下来，按钮的点击事件触发一个“减量”动作，通过`self.send`发送到组件的减速器。记住，渲染函数将`self`作为其参数提供：
+
+```js
+<button onClick={_event => self.send(Increment)}>
+  {ReasonReact.string("+")}
+</button>
+```
+
+`state`类型声明定义了我们状态的形状。在这种情况下，我们的状态只是一个保存组件当前计数的整数。组件的初始状态是`0`：
+
+```js
+initialState: () => 0,
+```
+
+`initialState`需要一个类型为`unit => state`的函数。
+
+当被动作触发时，减速器函数接受该动作以及当前状态，并返回一个新状态。在当前动作上使用模式匹配，并使用`ReasonReact.Update`返回一个新状态：
+
+```js
+reducer: (action, state) =>
+  switch (action) {
+  | Increment => ReasonReact.Update(state + 1)
+  | Decrement => ReasonReact.Update(state - 1)
+  },
+```
+
+为了帮助您的 ReasonReact 应用程序为即将到来的 ReactJS Fiber 发布做好准备，确保`减速器`中的一切都是纯的。间接触发副作用的一种方法是使用`ReasonReact.UpdateWithSideEffects`：
+
+```js
+reducer: (action, state) =>
+  switch (action) {
+  | Increment =>
+    ReasonReact.UpdateWithSideEffects(
+      state + 1,
+      (_self => Js.log("incremented")),
+    )
+  | Decrement => ReasonReact.Update(state - 1)
+  },
+```
+
+`减速器`的返回值必须是以下变体构造函数之一：
+
++   `ReasonReact.NoUpdate`
+
++   `ReasonReact.Update(state)`
+
++   `ReasonReact.SideEffects(self => unit)`
+
++   `ReasonReact.UpdateWithSideEffects(state, self => unit)`
+
+我们可以从我们的副作用中触发新的动作，因为我们再次提供了`self`：
+
+```js
+reducer: (action, state) =>
+  switch (action) {
+  | Increment =>
+    ReasonReact.UpdateWithSideEffects(
+      state + 1,
+      (
+        self =>
+          Js.Global.setTimeout(() => self.send(Decrement), 1000) |> ignore
+      ),
+    )
+  | Decrement => ReasonReact.Update(state - 1)
+  },
+```
+
+增加后，`减速器`触发一个副作用，在一秒后触发“减量”动作。
+
+# 重构
+
+现在，让我们想象我们现在需要我们的有状态组件在计数达到 10 时显示一条祝贺用户的消息，一旦消息显示出来，用户可以通过点击关闭按钮关闭消息。多亏了我们乐于助人的编译器，我们可以按照以下步骤进行操作：
+
+1.  更新`state`的形状
+
+1.  更新可用的`动作`
+
+1.  通过编译器错误进行步骤
+
+1.  更新`render`函数
+
+编译器消息将提醒我们更新组件的初始状态和减速器。由于我们现在还需要跟踪是否显示消息，让我们将`state`的形状更改为这样：
+
+```js
+type state = {
+  count: int,
+  showMessage: bool
+};
+```
+
+对于我们的动作，让我们将`增量`和`减量`合并为一个接受`int`的构造函数，我们将有一个新的构造函数来切换消息：
+
+```js
+type action =
+  | UpdateCount(int)
+  | ToggleMessage;
+```
+
+现在，我们不再有`增量`和`减量`，而是有`UpdateCount`，它包含一个表示当前计数变化量的整数。
+
+编译后，我们看到一个友好的错误提示，告诉我们之前的“减量”动作找不到：
+
+```js
+We've found a bug for you!
+24 | render: self =>
+25 | <>
+26 | <button onClick={_event => self.send(Decrement)}>
+27 | {ReasonReact.string("-")}
+28 | </button>
+The variant constructor Decrement can't be found.
+- If it's defined in another module or file, bring it into scope by:
+- Annotating it with said module name: let food = MyModule.Apple
+- Or specifying its type: let food: MyModule.fruit = Apple
+- Constructors and modules are both capitalized. Did you want the latter?
+Then instead of let foo = Bar, try module Foo = Bar.
+```
+
+在`render`函数中，用`UpdateCount(+1)`替换`增量`，用`UpdateCount(-1)`替换`减量`：
+
+```js
+render: self =>
+  <>
+    <button onClick={_event => self.send(UpdateCount(-1))}>
+      {ReasonReact.string("-")}
+    </button>
+    <span> {ReasonReact.string(string_of_int(self.state))} </span>
+    <button onClick={_event => self.send(UpdateCount(1))}>
+      {ReasonReact.string("+")}
+    </button>
+  </>,
+```
+
+再次编译，我们被告知在我们的减速器中，`增量`不属于类型`动作`。让我们更新我们的减速器来处理`UpdateCount`和`ToggleMessage`。如果我们忘记了一个构造函数，编译器会让我们知道减速器中的 switch 表达式不是穷尽的：
+
+```js
+reducer: (action, state) =>
+  switch (action) {
+  | UpdateCount(delta) =>
+    let count = state.count + delta;
+    ReasonReact.UpdateWithSideEffects(
+      {...state, count},
+      (
+        self =>
+          if (count == 10) {
+            self.send(ToggleMessage);
+          }
+      ),
+    );
+  | ToggleMessage =>
+    ReasonReact.Update({...state, showMessage: !state.showMessage})
+  },
+```
+
+关于前面的代码片段，有几件事情需要提到：
+
++   在`UpdateCount`中，我们声明了一个反映新计数的绑定`count`。
+
++   我们使用`...`来覆盖状态记录的一部分。
+
++   多亏了记录标点符号的支持，我们可以写`{...state, count}`而不是`{...state, count: count}`。
+
++   `UpdateCount`正在使用`UpdateWithSideEffects`触发一个`ToggleMessage`动作，当计数达到 10 时；我们也可以这样做：
+
+```js
+| UpdateCount(delta) =>
+  let count = state.count + delta;
+  ReasonReact.Update(
+    if (count == 10) {
+      {count, showMessage: true};
+    } else {
+      {...state, count};
+    },
+  );
+```
+
+我更喜欢使用`UpdateWithSideEffects`，这样`UpdateCount`只需要关心它的计数字段，如果需要更新其他字段，`UpdateCount`可以触发正确的操作，而不需要知道如何发生。
+
+在这里编译后，我们得到一个有趣的编译器错误：
+
+```js
+We've found a bug for you!
+
+16 | switch (action) {
+17 | | UpdateCount(delta) =>
+18 | let count = state.count + delta;
+19 | ReasonReact.UpdateWithSideEffects(
+20 | {...state, count},
+
+This has type:
+  int
+But somewhere wanted:
+  state
+```
+
+编译器在第 18 行（之前显示）的`state.count`中看到`state`，将其视为`int`类型而不是`state`类型。这是因为我们的渲染函数使用`string_of_int(self.state)`而不是`string_of_int(self.state.count)`。在更新我们的渲染函数以反映这一点后，我们得到另一个类似的消息，抱怨类型`int`和类型`state`不兼容。这是因为我们的初始状态仍然返回`0`而不是`state`类型的记录。
+
+更新初始状态后，代码最终成功编译：
+
+```js
+initialState: () => {count: 0, showMessage: false},
+```
+
+现在，我们准备更新渲染函数，在计数达到 10 时显示消息：
+
+```js
+render: self =>
+  <>
+    <button onClick={_event => self.send(UpdateCount(-1))}>
+      {ReasonReact.string("-")}
+    </button>
+    <span> {ReasonReact.string(string_of_int(self.state.count))} </span>
+    <button onClick={_event => self.send(UpdateCount(1))}>
+      {ReasonReact.string("+")}
+    </button>
+    {
+      if (self.state.showMessage) {
+        <>
+          <p>
+            {ReasonReact.string("Congratulations! You've reached ten!")}
+          </p>
+          <button onClick={_event => self.send(ToggleMessage)}>
+            {ReasonReact.string("close")}
+          </button>
+        </>;
+      } else {
+        ReasonReact.null;
+      }
+    }
+  </>,
+```
+
+由于`if/else`在 Reason 中是一个表达式，我们可以在 JSX 中使用它来渲染标记或`ReasonReact.null`（类型为`ReasonReact.reactElement`）。
+
+# 实例变量
+
+虽然我们的示例在第一次计数达到 10 时正确显示消息，但没有阻止我们的`ToggleMessage`操作在`reducer`中的`UpdateCount`情况下再次触发。如果用户达到 10，然后递减然后递增，消息将再次切换。为了确保`UpdateCount`只触发一次`ToggleMessage`操作，我们可以在状态中使用**实例变量**。
+
+在 ReactJS 中，每当状态发生变化时，组件都会重新渲染。在 ReasonReact 中，实例变量永远不会触发重新渲染，并且可以正确地放置在组件的状态中。
+
+让我们添加一个实例变量来跟踪用户是否已经看到消息：
+
+```js
+type state = {
+  count: int,
+  showMessage: bool,
+  userHasSeenMessage: ref(bool)
+};
+```
+
+# Ref 和可变记录
+
+ReasonReact 实例变量和普通状态变量之间的区别在于使用`ref`。之前，我们看到`state.userHasSeenMessage`的类型是`ref(bool)`而不是`bool`。这使得`state.userHasSeenMessage`成为一个实例变量。
+
+由于`ref`只是具有可变字段的记录类型的语法糖，让我们首先讨论可变记录字段。
+
+要允许记录字段可变，需要在字段名称前加上`mutable`。然后，可以使用`=`运算符就地更新这些字段：
+
+```js
+type ref('a) = {
+  mutable contents: 'a
+};
+
+let foo = {contents: 5};
+Js.log(foo.contents); /* 5 */
+foo.contents = 6;
+Js.log(foo.contents); /* 6 */
+```
+
+然而，类型声明已经包含在 Reason 的标准库中，所以我们可以省略它，前面的代码的其余部分仍然可以工作，声明它会遮蔽原始类型声明。我们可以通过用不可变记录遮蔽`ref`类型来证明这一点：
+
+```js
+type ref('a) = {contents: 'a};
+
+let foo = {contents: 5};
+Js.log(foo.contents); /* 5 */
+foo.contents = 6;
+Js.log(foo.contents); /* 6 */
+```
+
+编译器出现以下错误：
+
+```js
+We've found a bug for you!
+
+The record field contents is not mutable
+```
+
+除了具有内置的类型定义之外，`ref`还具有一些内置函数。即`ref`用于创建类型为`ref`的记录，`^`用于获取`ref`的内容，`:=`用于设置`ref`的内容：
+
+```js
+type foo = ref(int);
+
+let foo = ref(5);
+Js.log(foo^); /* 5 */
+foo := 6;
+Js.log(foo^); /* 6 */
+```
+
+让我们回到我们的 ReasonReact 示例，让我们使用我们的新的`userHasSeenMessage`实例变量。在更新状态的形状之后，我们还需要更新组件的初始状态：
+
+```js
+initialState: () => {
+  count: 0,
+  showMessage: false,
+  userHasSeenMessage: ref(false),
+},
+```
+
+现在，我们的代码再次编译，我们可以更新`reducer`以使用这个实例变量：
+
+```js
+reducer: (action, state) =>
+  switch (action) {
+  | UpdateCount(delta) =>
+    let count = state.count + delta;
+    if (! state.userHasSeenMessage^ && count == 10) {
+      state.userHasSeenMessage := true;
+      ReasonReact.UpdateWithSideEffects(
+        {...state, count},
+        (self => self.send(ToggleMessage)),
+      );
+    } else {
+      ReasonReact.Update({...state, count});
+    };
+  | ToggleMessage =>
+    ReasonReact.Update({...state, showMessage: !state.showMessage})
+  },
+```
+
+现在，消息被正确显示一次。
+
+# 导航菜单
+
+让我们将我们迄今为止学到的东西作为基础，创建一个具有导航菜单和客户端路由的应用程序。在触摸设备上，用户将能够滑动关闭菜单，并且菜单将实时响应用户的触摸。如果用户在菜单关闭超过 50%时滑动然后释放，菜单将关闭；否则，它将保持打开状态。唯一的例外是，如果用户以足够高的速度关闭菜单，它将始终关闭。
+
+我们将在本书的其余部分中使用这个应用程序。要跟随，克隆 GitHub 存储库并导航到代表本章开头的目录：
+
+```js
+git clone https://github.com/PacktPublishing/ReasonML-Quick-Start-Guide.git
+cd ReasonML-Quick-Start-Guide
+cd Chapter03/app-start
+npm install
+```
+
+让我们花点时间看看我们要处理的内容。您将看到以下目录结构：
+
+```js
+├── bsconfig.json
+├── package-lock.json
+├── package.json
+├── src
+│   ├── App.re
+│   ├── App.scss
+│   ├── Index.re
+│   ├── Index.scss
+│   ├── img
+│   │   └── icon
+│   │   ├── arrow.svg
+│   │   ├── chevron.svg
+│   │   └── hamburger.svg
+│   └── index.html
+└── webpack.config.js
+```
+
+我们的`bsconfig.json`设置为将编译后的`.bs.js`文件放在`lib/es6/src`中，并且我们已经配置 webpack 来查找`lib/es6/src/Index.bs.js`作为入口点。
+
+运行`npm install`，然后运行`npm start`，以在监视模式下使用 bsb 和 webpack 为我们的应用提供服务，地址为`http://localhost:3000`。
+
+目前，我们的应用程序显示一个带有汉堡图标的蓝色导航栏。单击图标会打开菜单，单击菜单外部会关闭菜单。
+
+在`App.re`中，我们的状态目前是一个单字段记录，用于跟踪菜单的状态：
+
+```js
+type state = {isOpen: bool};
+```
+
+我们有一个动作：
+
+```js
+type action =
+  | ToggleMenu(bool);
+```
+
+我们的 reducer 负责更新菜单的状态：
+
+```js
+reducer: (action, _state) =>
+  switch (action) {
+  | ToggleMenu(isOpen) => ReasonReact.Update({isOpen: isOpen})
+  },
+```
+
+尽管 Reason 支持记录 pun，但对于单字段记录，它不起作用，因为 Reason 将`{isOpen}`视为块而不是记录。
+
+我们的渲染函数渲染一个带有条件类名的`<div />`元素，具体取决于当前状态：
+
+```js
+<div
+  className={"App" ++ (self.state.isOpen ? " overlay" : "")}
+  onClick={
+    _event =>
+      if (self.state.isOpen) {
+        self.send(ToggleMenu(false));
+      }
+  }>
+```
+
+`App.scss`使用`overlay`类来在导航菜单打开时只显示一个深色叠加层：
+
+```js
+.App {
+  min-height: 100vh;
+
+  &:after {
+    content: "";
+    transition: opacity 450ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 0ms cubic-bezier(0.23, 1, 0.32, 1) 450ms;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.33);
+    transform: translateX(-100%);
+    opacity: 0;
+    z-index: 1;
+  }
+
+  &.overlay {
+    &:after {
+      transition: opacity 450ms cubic-bezier(0.23, 1, 0.32, 1);
+      transform: translateX(0%);
+      opacity: 1;
+    }
+  }
+  ...
+}
+```
+
+注意`transition`属性是如何为`.App:after`和`.App.overly:after`定义的，前者包括对`transform`属性的`450ms`延迟的过渡，而后者则移除了该过渡。这样做的效果是即使菜单关闭，也能实现平滑的过渡。
+
+# 绑定
+
+让我们检查`App.re`顶部对 JavaScript 的`require`函数的绑定。由于我们将在第四章中深入研究 BuckleScript，*BuckleScript，Belt 和互操作性*，让我们推迟讨论细节，只简要看一下这个绑定在做什么：
+
+```js
+[@bs.val] external require: string => string = "";
+
+require("../../../src/App.scss");
+```
+
+`external`关键字创建一个新的绑定，类似于`let`关键字。绑定到 JavaScript 的`require`函数后，只要我们使用 BuckleScript 编译器，就可以在 Reason 中使用它。我们用它来要求`App.scss`以及一些图片。检查编译输出`lib/es6/src/App.bs.js`显示，前面的 Reason 代码编译为以下内容：
+
+```js
+require("../../../src/App.scss");
+```
+
+Webpack 会处理剩下的事情。
+
+# 事件
+
+由于顶层`<div />`元素有一个点击事件处理程序，总是关闭菜单，其子元素的任何点击也会触发该顶层点击事件处理程序。为了允许菜单打开（或保持打开），我们需要在某些子元素的点击事件上调用`event.stopPropagation()`。
+
+在 ReasonReact 中，我们可以使用`ReactEvent`模块来实现这一点：
+
+```js
+onClick=(event => ReactEvent.Mouse.stopPropagation(event))
+```
+
+`ReactEvent`模块有子模块对应于 ReactJS 的合成事件的每一个：
+
++   剪贴板事件
+
++   组合事件
+
++   键盘事件
+
++   焦点事件
+
++   表单事件
+
++   鼠标事件
+
++   指针事件
+
++   选择事件
+
++   触摸事件
+
++   UI 事件
+
++   滚轮事件
+
++   媒体事件
+
++   图像事件
+
++   动画事件
+
++   过渡事件
+
+有关 ReactJS 合成事件的更多信息，请访问[`reactjs.org/docs/events.html`](https://reactjs.org/docs/events.html)。
+
+要从触摸事件中获取诸如`event.changedTouches.item(0).clientX`之类的值，我们使用 ReasonReact 和 BuckleScript 的组合。
+
+# Js.t 对象
+
+BuckleScript 允许我们使用`##`语法访问任意 JavaScript 对象字段。我们可以在任何`Js.t`类型上使用语法，这是一个用于任意 JavaScript 对象的 Reason 类型。我们将在第四章中了解更多关于这个和其他互操作特性的信息，*BuckleScript，Belt 和互操作性*。
+
+由于`ReactEvent.Touch.changedTouches(event)`返回一个普通的 JavaScript 对象，我们可以使用以下方法访问其字段：
+
+```js
+/* App.re */
+ReactEvent.Touch.changedTouches(event)##item(0)##clientX
+```
+
+查看编译输出，我们看到这就是我们想要的：
+
+```js
+/* App.bs.js */
+event.changedTouches.item(0).clientX
+```
+
+我们将使用这个来为我们的菜单添加触摸功能，以便用户可以滑动菜单关闭并在滑动时看到菜单移动。
+
+# 添加动作
+
+让我们首先为`TouchStart`、`TouchMove`和`TouchEnd`添加操作：
+
+```js
+type action =
+  | ToggleMenu(bool)
+  | TouchStart(float)
+  | TouchMove(float)
+  | TouchEnd;
+```
+
+我们只需要`TouchStart`和`TouchMove`的触摸事件的`clientX`属性。
+
+让我们在顶层`<div />`组件上添加事件监听器：
+
+```js
+render: self =>
+  <div
+    className={"App" ++ (self.state.isOpen ? " overlay" : "")}
+    onClick={
+      _event =>
+        if (self.state.isOpen) {
+          self.send(ToggleMenu(false));
+        }
+    }
+    onTouchStart={
+      event =>
+        self.send(
+          TouchStart(
+            ReactEvent.Touch.changedTouches(event)##item(0)##clientX,
+          ),
+        )
+    }
+    onTouchMove={
+      event =>
+        self.send(
+          TouchMove(
+            ReactEvent.Touch.changedTouches(event)##item(0)##clientX,
+          ),
+        )
+    }
+    onTouchEnd={_event => self.send(TouchEnd)}>
+```
+
+在我们的 reducer 中，暂时只记录那些`clientX`值：
+
+```js
+reducer: (action, state) =>
+  switch (action) {
+  | ToggleMenu(isOpen) => ReasonReact.Update({isOpen: isOpen})
+  | TouchStart(clientX) =>
+    Js.log2("Start", clientX);
+    ReasonReact.NoUpdate;
+  | TouchMove(clientX) =>
+    Js.log2("Move", clientX);
+    ReasonReact.NoUpdate;
+  | TouchEnd =>
+    Js.log("End");
+    ReasonReact.NoUpdate;
+  },
+```
+
+为了找出用户滑动的整体方向，我们需要该滑动的第一个和最后一个`clientX`值。菜单应该按照第一个和最后一个`clientX`值的差值移动，但只有在用户滑动的方向会关闭菜单的情况下才移动。
+
+我们的状态现在包括一个`touches`记录，其中包含第一个和最后一个`clientX`值的值：
+
+```js
+type touches = {
+  first: option(float),
+  last: option(float),
+};
+
+type state = {
+  isOpen: bool,
+  touches,
+};
+```
+
+由于我们不能嵌套记录类型定义，我们单独定义`touches`类型，并将其包含在`state`中。您会注意到`state.touches.first`的类型是`option(float)`，因为用户可能没有使用触摸设备，或者用户尚未进行交互。
+
+改变我们状态的形状需要我们同时改变初始状态：
+
+```js
+initialState: () => {
+  isOpen: false,
+  touches: {
+    first: None,
+    last: None,
+  },
+},
+```
+
+在 reducer 中，如果菜单是打开的，我们在`TouchStart`情况下使用一个新的记录更新`state.touches`，但在`TouchMove`情况下，我们只更新`state.touches.last`。如果菜单当前没有打开，将返回`ReasonReact.NoUpdate`：
+
+```js
+reducer: (action, state) =>
+  switch (action) {
+  | ToggleMenu(isOpen) => ReasonReact.Update({...state, isOpen})
+  | TouchStart(clientX) =>
+    if (state.isOpen) {
+      ReasonReact.Update({
+        ...state,
+        touches: {
+          first: Some(clientX),
+          last: None,
+        },
+      });
+    } else {
+      ReasonReact.NoUpdate;
+    }
+  | TouchMove(clientX) =>
+    if (state.isOpen) {
+      ReasonReact.Update({
+        ...state,
+        touches: {
+          ...state.touches,
+          last: Some(clientX),
+        },
+      });
+    } else {
+      ReasonReact.NoUpdate;
+    }
+  | TouchEnd => ReasonReact.NoUpdate
+  },
+```
+
+我们很快将使用这个状态来有条件地在`<nav />`元素上设置内联样式。
+
+# 内联样式
+
+在 ReasonReact 中，我们可以通过`ReactDOMRe.Style.make`添加内联样式，它接受 CSS 属性作为可选的标记参数。由于它们都是可选的，传递`unit`是调用该函数所必需的：
+
+```js
+style={ReactDOMRe.Style.make(~backgroundColor="yellow", ())}
+```
+
+将这个应用到我们的`<nav />`元素上，我们可以根据状态中是否有第一个和最后一个触摸来有条件地添加样式：
+
+```js
+style={
+  switch (self.state.touches) {
+  | {first: Some(x), last: Some(x')} =>
+    ReactDOMRe.Style.make(
+      ~transform=
+        "translateX("
+        ++ string_of_float(x' -. x > 0.0 ? 0.0 : x' -. x)
+        ++ "0px)",
+      ~transition="none",
+      (),
+    )
+  | _ => ReactDOMRe.Style.make()
+  }
+}
+```
+
+在`transform`属性中，我们使用`"0px"`进行连接，而不仅仅是`"px"`，因为`float`类型总是包含小数点，但可能用户滑动的距离恰好是一百像素，`transform: translateX(100.px)`不是有效的 CSS，但`transform: translateX(100.0px)`是。
+
+在触摸设备上运行这个程序，我们能够根据用户的滑动来改变菜单的位置。现在，让我们专注于 reducer 中的`TouchEnd`情况。暂时，如果用户将菜单滑动关闭不到一半，我们将设置菜单保持打开状态，否则关闭。如果`state.touches.last`是`None`，那么用户没有滑动，我们不更新`state`：
+
+```js
+| TouchEnd =>
+  if (state.isOpen) {
+    let x = Belt.Option.getWithDefault(state.touches.last, 0.0);
+    if (x < 300.0 /. 2.0) {
+      ReasonReact.UpdateWithSideEffects(
+        {
+          ...state,
+          touches: {
+            first: None,
+            last: None,
+          },
+        },
+        (self => self.send(ToggleMenu(false))),
+      );
+    } else {
+      ReasonReact.Update({
+        ...state,
+        touches: {
+          first: None,
+          last: None,
+        },
+      });
+    };
+  } else {
+    ReasonReact.NoUpdate;
+  }
+```
+
+注意，我们将`state.touches`重置为一个新的记录，其中包含`{first: None, last: None}`，这将导致`<nav />`元素上的样式属性为空。
+
+当前的实现假设导航的宽度为`300px`。我们可以使用 React ref 来获取对 DOM 节点的引用，然后获取它的`clientWidth`，而不是假设宽度。
+
+# React ref
+
+React ref 只是`state`的一个实例变量：
+
+```js
+type state = {
+  isOpen: bool,
+  touches,
+  width: ref(float),
+};
+```
+
+我们通过将`ref`属性设置为`self.handle((ref, self) => ...)`的结果来在`<nav />`元素上附加 React ref：
+
+```js
+ref={
+  self.handle((ref, self) =>
+    self.state.width :=
+      (
+        switch (Js.Nullable.toOption(ref)) {
+        | None => 0.0
+        | Some(r) => ReactDOMRe.domElementToObj(r)##clientWidth
+        }
+      )
+  )
+}
+```
+
+由于在 JavaScript 中，React ref 可能为`null`，我们将其转换为一个选项，并对其值进行模式匹配。
+
+React ref 的类型取决于它是 DOM 元素还是 React 组件。前者的类型是`Dom.element`，后者的类型是`ReasonReact.reactRef`。要将`ReasonReact.reactRef`转换为 JavaScript 对象，使用`ReasonReact.refToJsObj`而不是`ReactDOMRe.domElementToObj`。
+
+然后，在 reducer 中，我们可以使用`state.width`代替`300.0`作为菜单的宽度。由于`TouchStart`和`TouchMove`操作总是在菜单打开时更新状态，`<App />`组件总是重新渲染，这导致我们的 React ref 函数重新运行，我们可以合理地确定菜单的宽度始终是正确的。
+
+# 速度
+
+为了获得用户滑动的速度，我们还需要存储当前时间以及触摸事件的`clientX`。让我们绑定到浏览器的`performance.now()`方法：
+
+```js
+[@bs.val] [@bs.scope "performance"] external now: unit => float = "";
+```
+
+我们还将在`touches`类型中为触摸的当前时间腾出一些空间：
+
+```js
+type touches = {
+  first: option((float, float)),
+  last: option((float, float)),
+};
+```
+
+在减速器中，我们将`Some(clientX)`更改为`Some((clientX, now()))`。
+
+现在，我们可以计算用户在`TouchEnd`情况下的滑动速度：
+
+```js
+| TouchEnd =>
+  if (state.isOpen) {
+    let (x, t) =
+      Belt.Option.getWithDefault(state.touches.first, (0.0, 0.0));
+    let (x', t') =
+      Belt.Option.getWithDefault(state.touches.last, (0.0, 0.0));
+    let velocity = (x' -. x) /. (t' -. t);
+    let state = {
+      ...state,
+      touches: {
+        first: None,
+        last: None,
+      },
+    };
+    if (velocity < (-0.3) || x' < state.width^ /. 2.0) {
+      ReasonReact.UpdateWithSideEffects(
+        state,
+        (self => self.send(ToggleMenu(false))),
+      );
+    } else {
+      ReasonReact.Update(state);
+    };
+  } else {
+    ReasonReact.NoUpdate;
+  }
+```
+
+我觉得每毫秒-0.3 像素的速度对我来说感觉不错，但是随意使用任何对你来说感觉正确的值。
+
+请注意，我们可以使用模式匹配来解构`(x, t)`，这会在作用域中创建两个绑定。此外，`x'`是 Reason 中有效的绑定名称，通常发音为*x prime*。最后，请注意我们的状态被遮蔽以防止编写重复的代码。
+
+为了完成速度功能，我们在渲染函数中更新`style`属性，以将`state.touches.first`和`state.touches.last`都视为元组：
+
+```js
+style=(
+  switch (self.state.touches) {
+  | {first: Some((x, _)), last: Some((x', _))} =>
+    ReactDOMRe.Style.make(
+      ~transform=
+        "translateX("
+        ++ string_of_float(x' -. x > 0.0 ? 0.0 : x' -. x)
+        ++ "0px)",
+      ~transition="none",
+      (),
+    )
+  | _ => ReactDOMRe.Style.make()
+  }
+)
+```
+
+现在，打开菜单时，菜单对触摸作出了很好的响应-非常酷！
+
+# 客户端路由
+
+ReasonReact 附带了一个内置路由器，位于`ReasonReact.Router`模块中。它非常不具有偏见，因此非常灵活。公共 API 只有四个函数：
+
++   `ReasonReact.Router.watchUrl: (url => unit) => watcherID`
+
++   `ReasonReact.Router.unwatchUrl: watcherID => unit`
+
++   `ReasonReact.Router.push: string => unit`
+
++   `ReasonReact.Router.dangerouslyGetInitialUrl: unit => url`
+
+`watchUrl`函数开始监视 URL 的更改。更改后，将调用`url => unit`回调函数。`unwatchUrl`函数停止监视 URL。
+
+`push`函数设置 URL，`dangerouslyGetInitialUrl`函数获取`url`类型的记录。`dangerouslyGetInitialUrl`函数仅在`didMount`生命周期钩子中使用，与`watchUrl`一起使用，以防止陈旧信息的问题。
+
+`url`类型定义如下：
+
+```js
+type url = {
+  path: list(string),
+  hash: string,
+  search: string,
+};
+```
+
+我们将在第四章中学习更多关于`list`类型构造函数的知识，*BuckleScript，Belt 和互操作性*。`url`记录中的`path`字段是`list(string)`类型。如果`window.location.pathname`的值是`"/book/title/edit"`，那么`url.path`的值将是`["book", "title", "edit"]`，这是一个字符串列表。语法使它看起来像 JavaScript 数组，但有一些区别。简而言之，Reason 列表是不可变的同构单链表，意味着所有元素必须是相同类型的。
+
+`watcherID`类型是一个**抽象类型**。我们将在第六章中学习更多关于抽象类型的知识，*CSS-in-JS（在 Reason 中）*。获取`watcherID`类型的值的唯一方法是作为`ReasonReact.Router.watchUrl`的返回值。
+
+让我们创建一个路由器组件，它包装我们的`<App />`组件并为其提供`currentRoute`属性。以下内容受到了 Khoa Nguyen（`@thangngoc89`）示例的启发。
+
+首先，让我们为`<Home />`，`<Page1 />`，`<Page2 />`和`<Page3 />`创建占位符组件。然后，在`Router.re`中，让我们创建一个表示路由的类型以及路由列表：
+
+```js
+type route = {
+  href: string,
+  title: string,
+  component: ReasonReact.reactElement,
+};
+
+let routes = [
+  {href: "/", title: "Home", component: <Home />},
+  {href: "/page1", title: "Page1", component: <Page1 />},
+  {href: "/page2", title: "Page2", component: <Page2 />},
+  {href: "/page3", title: "Page3", component: <Page3 />},
+];
+```
+
+每个路由都有一个`href`，`title`和一个相关的`component`，如果该路由是当前路由，则将在`<App />`中呈现。
+
+# 当前路由
+
+在`Index.re`中，让我们在路由器组件中包装`<App />`，并提供`currentRoute`属性：
+
+```js
+ReactDOMRe.renderToElementWithId(
+  <Router.WithRouter>
+    ...((~currentRoute) => <App currentRoute />)
+  </Router.WithRouter>,
+  "root",
+);
+```
+
+在`Router.re`中，我们使用`module`语法定义了三个组件-`<WithRouter />`，`<Link />`和`<NavLink />`。由于每个文件也是一个模块，这三个组件嵌套在`Router`模块下，在`Index.re`中，我们需要告诉编译器在`Router`模块中查找`<WithRouter />`：
+
+```js
+module WithRouter = {
+  type state = route;
+  type action =
+    | ChangeRoute(route);
+  let component = ReasonReact.reducerComponent("WithRouter");
+  let make = children => {
+    ...component,
+    didMount: self => {
+      let watcherID =
+        ReasonReact.Router.watchUrl(url =>
+          self.send(ChangeRoute(urlToRoute(url)))
+        );
+      ();
+      self.onUnmount(() => ReasonReact.Router.unwatchUrl(watcherID));
+    },
+    initialState: () =>
+      urlToRoute(ReasonReact.Router.dangerouslyGetInitialUrl()),
+    reducer: (action, _state) =>
+      switch (action) {
+      | ChangeRoute(route) => ReasonReact.Update(route)
+      },
+    render: self => children(~currentRoute=self.state),
+  };
+};
+```
+
+我们之前已经见过所有这些概念。`<WithRouter />`只是一个减速器组件。组件的状态是之前定义的相同路由类型，只有一个操作可以更改路由。一旦`<WithRouter />`被挂载，`ReasonReact.Router`开始监视 URL，每当 URL 更改时，就会触发`ChangeRoute`操作，这将调用减速器，然后更新状态，然后使用更新的`currentRoute`属性重新呈现`<App />`。
+
+为了确保每当`<App />`接收到新的`currentRoute`属性时，我们都会关闭菜单，我们为`<App />`添加了一个`willReceiveProps`生命周期钩子：
+
+```js
+willReceiveProps: self => {...self.state, isOpen: false},
+```
+
+# 辅助函数
+
+由于`ReasonReact.Router`的`url.path`是一个字符串列表，而我们的`Router.route.href`是一个字符串，我们需要一种将字符串转换为字符串列表的方法：
+
+```js
+let hrefToPath = href =>
+  Js.String.replaceByRe([%bs.re "/(^\\/)|(\\/$)/"], "", href)
+  |> Js.String.split("/")
+  |> Belt.List.fromArray;
+```
+
+我们将在第四章中深入讨论 Reason 的管道运算符（`|>`）和 JavaScript 互操作性，*BuckleScript，Belt 和互操作性*。
+
+我们还需要一种方法，将`url`转换为`route`，以便在初始状态和`watchUrl`的回调函数中使用：
+
+```js
+let urlToRoute = (url: ReasonReact.Router.url) =>
+  switch (
+    Belt.List.getBy(routes, route => url.path == hrefToPath(route.href))
+  ) {
+  | None => Belt.List.headExn(routes)
+  | Some(route) => route
+  };
+```
+
+在第四章中，*BuckleScript，Belt 和互操作性*，我们将更深入地了解 BuckleScript、Belt 和 JavaScript 互操作性。`urlToRoute`函数尝试在将其转换为字符串列表后，找到`routes`列表中`url.path`在结构上等于`route.href`的`route`。
+
+如果不存在这样的`route`，它将返回`routes`列表中的第一个`route`，这是与`<Home />`组件相关联的`route`。否则，将返回匹配的`route`。
+
+`<Link />`组件是一个简单的无状态组件，它呈现一个锚链接。请注意，单击处理程序会阻止默认的浏览器行为并更新 URL：
+
+```js
+module Link = {
+  let component = ReasonReact.statelessComponent("Link");
+  let make = (~href, ~className="", children) => {
+    ...component,
+    render: self =>
+      <a
+        href
+        className
+        onClick=(
+          self.handle((event, _self) => {
+            ReactEvent.Mouse.preventDefault(event);
+            ReasonReact.Router.push(href);
+          })
+        )>
+        ...children
+      </a>,
+  };
+};
+```
+
+`<NavLink />`组件包装了`<Link />`组件，并提供了当前路由作为属性，它用于有条件地设置`active`类：
+
+```js
+module NavLink = {
+  let component = ReasonReact.statelessComponent("NavLink");
+  let make = (~href, children) => {
+   ...component,
+   render: _self =>
+    <WithRouter>
+      ...(
+          (~currentRoute) =>
+            <Link
+              href className=(currentRoute.href == href ? "active" : "")>
+              ...children
+            </Link>
+          )
+    </WithRouter>,
+  };
+};
+```
+
+# 用法
+
+现在我们已经定义了路由器，我们可以重写我们的导航菜单链接，使用`<NavLink />`组件而不是直接使用原始锚链接：
+
+```js
+<li>
+  <Router.NavLink href="/">
+    (ReasonReact.string("Home"))
+  </Router.NavLink>
+</li>
+```
+
+无论我们想要显示当前页面的标题，我们都可以简单地访问当前`route`上的`title`字段：
+
+```js
+<h1> (ReasonReact.string(currentRoute.title)) </h1>
+```
+
+而且，我们可以以类似的方式呈现路由的相关组件：
+
+```js
+<main> currentRoute.component </main>
+```
+
+重要的是要强调 ReasonReact 的路由器不会规定`watchUrl`的回调函数应该做什么。在我们的情况下，我们触发一个更新当前路由的动作，这只是一个任意的记录。路由类型完全可以是完全不同的东西。而且，并没有规定路由器应该是顶级组件的法律。在这里有很多创造性的空间，我个人很期待看到社区会有什么想法。
+
+# 摘要
+
+在本章中，我们看到 ReasonReact 是构建 React 组件的一种更简单、更安全的方式。在编译时，Reason 的类型系统强制执行正确的组件使用是一个巨大的胜利。此外，它使重构更安全、更便宜，也更愉快。ReasonReact *只是* Reason，就像 ReactJS *只是* JavaScript 一样。到目前为止，我们所做的一切都只是 Reason 和 ReasonReact，没有任何第三方库，比如 Redux 或 React Router。
+
+正如我们将在第四章中看到的，*BuckleScript，Belt 和互操作性*，我们还可以选择在 Reason 中使用现有的 JavaScript（和 ReactJS）解决方案。熟悉了 BuckleScript、Belt 标准库和 JavaScript 互操作性后，我们将添加路由转换。
